@@ -179,29 +179,52 @@ async function triggerNewAnalysis(summaryType) {
 }
 
 function injectHeaderButtons() {
-  const container = document.querySelector('#center.style-scope.ytd-masthead');
-  if (!container || document.getElementById('yt-sum-header-group')) return;
+  const endContainer = document.querySelector('#end.style-scope.ytd-masthead #buttons');
+  if (!endContainer || document.getElementById('yt-sum-header-group')) return;
+
   const group = document.createElement('div');
   group.id = 'yt-sum-header-group';
   group.style.display = 'flex';
   group.style.alignItems = 'center';
+  group.style.marginRight = '12px';
+
   const dashBtn = document.createElement('button');
   dashBtn.className = 'yt-sum-btn dash';
-  dashBtn.innerText = '📋 Archiv';
+  dashBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
+        </svg>
+        Archiv
+    `;
   dashBtn.onclick = () => chrome.runtime.sendMessage({ action: 'open_dashboard' });
   group.appendChild(dashBtn);
+
   if (window.location.pathname === '/watch') {
     const sBtn = document.createElement('button');
     sBtn.className = 'yt-sum-btn short';
-    sBtn.innerText = '⚡ Kurz';
+    sBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
+                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+            </svg>
+            Kurz
+        `;
     sBtn.onclick = () => startSummarize(window.location.href, 'short');
+
     const nBtn = document.createElement('button');
     nBtn.className = 'yt-sum-btn norm';
-    nBtn.innerText = '📄 Normal';
+    nBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+            </svg>
+            Normal
+        `;
     nBtn.onclick = () => startSummarize(window.location.href, 'normal');
+
     group.appendChild(sBtn);
     group.appendChild(nBtn);
   }
-  container.parentNode.insertBefore(group, container);
+
+  // Inject before the user profile/buttons group in the header
+  endContainer.parentNode.insertBefore(group, endContainer);
 }
 setInterval(injectHeaderButtons, 2000);

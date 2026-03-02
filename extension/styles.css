@@ -119,21 +119,42 @@
   color: #999;
 }
 .yt-sum-btn {
-  background: #d32f2f;
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
   border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin-right: 8px;
   cursor: pointer;
-  font-size: 13px;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0f0f0f;
+  margin-right: 8px;
+  white-space: nowrap;
 }
+
+/* Dark Mode Detect via YouTube attribute */
+html[dark] .yt-sum-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f1f1f1;
+}
+
+.yt-sum-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .yt-sum-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 .yt-sum-btn.short {
-  background: #4caf50;
+  /* Subtle indicator if needed, but keeping it clean for now */
 }
 .yt-sum-btn.norm {
-  background: #1976d2;
 }
 .yt-sum-btn.dash {
-  background: #607d8b;
 }

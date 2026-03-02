@@ -1,85 +1,74 @@
-# GEMINI.md - YouTube Summarizer Project Context
-
-This document provides essential context for AI assistants and developers working on the YouTube Summarizer project.
+# YouTube Summarizer (vSum) - Project Context
 
 ## Project Overview
 
-**YouTube Summarizer** is a dual-part application (Chrome Extension + Node.js Backend) designed to provide high-quality summaries and transcripts for YouTube videos.
-
-### Connection Modes
-
-- **Local Backend (Node.js):** Uses a local server for audio extraction (`yt-dlp`) and processing. Ideal for unlimited local use.
-- **Cloud (Serverless / RapidAPI):** Runs solely in the browser. Uses RapidAPI (YouTube to MP3) for audio extraction and calls AssemblyAI/Gemini directly from the extension. Ideal for users who don't want to run a local server.
+YouTube Summarizer (vSum) is a Chrome extension that integrates directly into the YouTube interface to provide AI-powered summaries of videos. It leverages a Node.js backend for heavy processing, including audio downloading, transcription, and summarization.
 
 ### Key Features
 
-- **Deep YouTube Integration:** Injects "Short" and "Normal" summary buttons directly into the YouTube masthead and video player.
-- **Multi-Tasking:** Allows simultaneous generation of short and normal summaries.
-- **Smart Caching:** Transcripts are cached locally in the browser.
-- **Audio Integration:** Includes a built-in audio player in the transcript view (local file in Backend mode, external URL in Cloud mode).
-- **High-Precision AI:** Uses AssemblyAI's `universal-3-pro` for transcription and Google's `gemini-1.5-pro` (or flash) for summarization.
+- **Stateless Backend:** Uses "Bring Your Own Key" (BYOK) for Gemini and AssemblyAI.
+- **Turbo Processing:** Utilizes AssemblyAI Universal-3 Pro for high-precision transcription and Google Gemini for summarization.
+- **Smart Caching:** Transcripts and audio files are cached locally for faster re-analysis.
+- **Deep YouTube Integration:** Injects buttons directly into the YouTube masthead and video player.
+- **Audio Player:** Includes an embedded audio player in the transcript view for quick review.
 
 ## Architecture
 
-1.  **Chrome Extension (MV3):**
-    - **Content Script (`extension/content.js`):** Handles UI injection and local state.
-    - **Background Script (`extension/background.js`):** Orchestrates the process. In Cloud mode, it performs direct API calls to RapidAPI, AssemblyAI, and Gemini.
-    - **Popup & Options:** Configuration for Connection Mode, API Keys (RapidAPI, Gemini, AssemblyAI), and Backend URL.
+### Backend (`/backend`)
 
-2.  **Stateless Backend (Node.js/Express):**
-    - Used only in "Local" mode.
-    - Downloads audio via `yt-dlp` and serves it locally.
+A Node.js Express server that orchestrates the data pipeline:
 
-## Tech Stack
+1. **Extraction:** Downloads high-quality audio using `yt-dlp.exe`.
+2. **Transcription:** Uses `AssemblyAI` (Universal-3 Pro) for multi-language speech-to-text.
+3. **Summarization:** Uses `Google Generative AI` (Gemini) to generate JSON-formatted summaries.
+4. **Caching:** Stores audio files in `backend/audio_cache/`.
 
-- **Backend:** Node.js, Express, `yt-dlp`, `fluent-ffmpeg`.
-- **Extension:** JavaScript (ES6+), Chrome Extension API.
-- **Cloud APIs:** RapidAPI (YouTube To Mp3 Download), AssemblyAI, Google Gemini.
+### Extension (`/extension`)
 
-## Key Files
+A Manifest V3 Chrome extension:
 
-- `backend/server.js`: Local processing logic.
-- `extension/background.js`: Main controller for both Local and Cloud modes.
-- `extension/manifest.json`: Extension config with host permissions for all APIs.
-- `extension/popup.html/js`: Settings UI and state management.
+- **Content Script (`content.js`):** Injects the UI (buttons and overlay) into YouTube pages.
+- **Background Script (`background.js`):** Acts as a message bridge between the content script and the backend API.
+- **UI:** Custom HTML/CSS overlay for displaying summaries and transcripts.
+- **Storage:** Uses `chrome.storage.local` to cache summaries and store API keys.
 
-## Development & Commands
+## Development Workflow
 
 ### Prerequisites
 
 - Node.js installed.
-- RapidAPI Key (for Cloud mode).
-- Gemini & AssemblyAI API Keys.
+- API Keys for **Google Gemini** and **AssemblyAI**.
 
-### Backend Setup (Optional for Local Mode)
+### Building and Running
+
+#### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
-node server.js
+# Binaries (yt-dlp, ffmpeg) are automatically downloaded during postinstall via setup-bins.js
+npm start
 ```
 
-### Extension Setup
+The backend runs on `http://localhost:5000`.
 
-1. Open `chrome://extensions/`.
+#### 2. Extension Setup
+
+1. Open `chrome://extensions/` in Chrome.
 2. Enable **Developer Mode**.
-3. Click **Load unpacked** and select the `extension` directory.
-4. Choose "Connection Mode" in the popup and enter the required keys.
+3. Click **Load unpacked** and select the `extension/` folder.
+4. Configure API keys via the extension popup or options page.
 
-### Linting & Formatting
+### Code Quality & Standards
 
-```bash
-npm run lint    # Run ESLint
-npm run format  # Format code with Prettier
-```
+- **ESLint:** Enforces coding standards across the project. Run with `npm run lint`.
+- **Prettier:** Automatically formats code. Run with `npm run format`.
+- **Husky & lint-staged:** Automatically runs linting and formatting on every commit.
 
-## Conventions
+## Key Files
 
-- **State Management:** The extension uses `chrome.storage.local` to persist API keys, settings, and summaries.
-- **Communication:** Communication between the extension and backend is primarily via SSE for long-running processing tasks.
-- **Styling:** Vanilla CSS with specific IDs (`yt-sum-overlay`, etc.) to avoid conflicts with YouTube's styles.
-- **Error Handling:** Backend returns status updates via SSE, including an `error` stage for graceful failure handling in the UI.
-
----
-
-_Note: This file is used as context for AI-driven development. Update it when significant architectural changes occur._
+- `backend/server.js`: Main API implementation.
+- `backend/setup-bins.js`: Dependency management for external binaries.
+- `extension/manifest.json`: Extension permissions and entry points.
+- `extension/content.js`: Main UI injection and state logic.
+- `extension/styles.css`: Custom styling for the YouTube overlay.
