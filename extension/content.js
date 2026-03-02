@@ -118,7 +118,7 @@ function renderOverlay() {
                   active === 'transcript' && currentVideoState.audioUrl
                     ? `
                     <div class="audio-player-container">
-                        <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}" type="audio/mpeg"></audio>
+                        <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}"></audio>
                     </div>
                 `
                     : ''

@@ -37,8 +37,13 @@ app.get('/process-video', async (req, res) => {
 
   try {
     const videoId = new URL(url).searchParams.get('v');
-    const audioFilename = `audio_${videoId}.mp3`;
-    const audioPath = path.join(audioStore, audioFilename);
+
+    // Check if any audio file for this video ID already exists
+    const existingFiles = fs
+      .readdirSync(audioStore)
+      .filter((f) => f.startsWith(`audio_${videoId}.`));
+    let audioFilename = existingFiles.length > 0 ? existingFiles[0] : null;
+    let audioPath = audioFilename ? path.join(audioStore, audioFilename) : null;
 
     let transcriptText = existingTranscript;
 
@@ -48,26 +53,27 @@ app.get('/process-video', async (req, res) => {
         ? path.join(__dirname, 'yt-dlp.exe')
         : 'yt-dlp';
 
-      if (!fs.existsSync(audioPath)) {
-        const ytDlp = spawn(ytDlpPath, [
-          '-f',
-          'ba',
-          '-x',
-          '--audio-format',
-          'mp3',
-          '--ffmpeg-location',
-          __dirname,
-          '-o',
-          audioPath,
-          url,
-        ]);
-        await new Promise((resolve) => {
+      if (!audioPath) {
+        const outputTemplate = path.join(audioStore, `audio_${videoId}.%(ext)s`);
+        const ytDlp = spawn(ytDlpPath, ['-f', 'ba', '-o', outputTemplate, url]);
+        await new Promise((resolve, reject) => {
           ytDlp.stdout.on('data', (d) => {
             const m = d.toString().match(/(\d+\.\d+)%/);
             if (m) sendStatus('downloading', parseFloat(m[1]), `Download: ${m[1]}%`);
           });
-          ytDlp.on('close', resolve);
+          ytDlp.on('close', (code) => {
+            if (code !== 0) reject(new Error(`yt-dlp exited with code ${code}`));
+            else resolve();
+          });
         });
+
+        // Find the newly downloaded file to get its real extension
+        const newFiles = fs
+          .readdirSync(audioStore)
+          .filter((f) => f.startsWith(`audio_${videoId}.`));
+        if (newFiles.length === 0) throw new Error('Download failed: file not found');
+        audioFilename = newFiles[0];
+        audioPath = path.join(audioStore, audioFilename);
       }
 
       // 2. Transkription mit Fallback-Support
