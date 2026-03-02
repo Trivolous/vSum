@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 350px;
+        padding: 15px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+          sans-serif;
+        background: #fdfdfd;
+        color: #333;
+      }
+      h2 {
+        font-size: 18px;
+        margin-top: 0;
+        color: #ff0000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #555;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 13px;
+      }
+      .hint {
+        font-size: 10px;
+        color: #888;
+        margin-top: 3px;
+      }
+      .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      #save-settings {
+        background: #ff0000;
+        color: white;
+      }
+      #save-settings:hover {
+        background: #cc0000;
+      }
+      #open-archive {
+        background: #f0f0f0;
+        color: #333;
+      }
+      #open-archive:hover {
+        background: #e0e0e0;
+      }
+      #status-msg {
+        display: none;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #28a745;
+      }
+      .model-config {
+        background: #fff8f8;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ffebeb;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>YouTube Summarizer</h2>
+
+    <div class="field">
+      <label>Backend URL (IP/Domain)</label>
+      <input type="text" id="backend-url" placeholder="http://localhost:5000" />
+      <div class="hint">Standard: http://localhost:5000</div>
+    </div>
+
+    <div class="field">
+      <label>Gemini API-Key</label>
+      <input type="password" id="gemini-key" placeholder="Ihr API-Key..." />
+    </div>
+
+    <div class="field">
+      <label>AssemblyAI Key</label>
+      <input type="password" id="aai-key" placeholder="Ihr API-Key..." />
+    </div>
+
+    <div class="model-config">
+      <div class="field">
+        <label>KI-Modell</label>
+        <select id="model-select">
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash (Schnell)</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro (Präzise)</option>
+          <option value="custom">Custom Modell...</option>
+        </select>
+      </div>
+
+      <div class="field" id="custom-model-container" style="display: none">
+        <label>Modell-Name</label>
+        <input type="text" id="custom-model-input" placeholder="z.B. gemini-3.1-pro-preview" />
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button id="save-settings">Speichern</button>
+      <button id="open-archive">Archiv</button>
+    </div>
+
+    <div id="status-msg">Einstellungen gespeichert!</div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <title>YouTube Summaries</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #f9f9f9;
+      }
+      h1 {
+        color: #f00;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+      }
+      .summary-card {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .thumbnail {
+        width: 120px;
+        float: left;
+        margin-right: 15px;
+        border-radius: 4px;
+      }
+      .details {
+        overflow: hidden;
+      }
+      .title {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-bottom: 5px;
+      }
+      .short {
+        background: #e8f5e9;
+        padding: 10px;
+        margin: 10px 0;
+        border-left: 4px solid #4caf50;
+      }
+      .normal {
+        background: #fffde7;
+        padding: 10px;
+        margin: 10px 0;
+        border-left: 4px solid #fbc02d;
+      }
+      .transcript {
+        font-size: 0.9em;
+        color: #666;
+        max-height: 100px;
+        overflow-y: auto;
+        background: #eee;
+        padding: 5px;
+        margin-top: 10px;
+        border-radius: 4px;
+      }
+      button.delete {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        float: right;
+      }
+      .clear-fix {
+        clear: both;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Meine Video Zusammenfassungen</h1>
+    <div id="summary-list">Lädt...</div>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>
