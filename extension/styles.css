@@ -155,7 +155,8 @@ html[dark] .yt-sum-drag-handle {
 .yt-sum-panel-content {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   padding: 16px;
   box-sizing: border-box;
 }
@@ -172,6 +173,7 @@ html[dark] .yt-sum-drag-handle {
 
 .tab-bar {
   display: flex;
+  flex-shrink: 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
@@ -220,6 +222,7 @@ html[dark] .tab-btn.active {
   border-radius: 8px;
   padding: 16px;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -249,6 +252,7 @@ html[dark] .result-text {
 
 .sum-footer {
   display: flex;
+  flex-shrink: 0;
   gap: 8px;
   margin-top: 16px;
   justify-content: flex-end;
