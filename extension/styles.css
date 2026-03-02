@@ -4,15 +4,15 @@
   top: 100px;
   right: 20px;
   width: 550px;
-  min-width: 300px;
-  min-height: 200px;
+  min-width: 350px;
+  min-height: 280px; /* Minimum height to fit header + tabs + footer + small content */
   background: white;
   z-index: 10000;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 0;
   font-family: 'Roboto', 'Arial', sans-serif;
-  max-height: 85vh;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   resize: both;
@@ -223,7 +223,7 @@ html[dark] .tab-btn.active {
   border-radius: 8px;
   padding: 16px;
   flex: 1;
-  min-height: 0; /* Key for enabling scrolling in children */
+  min-height: 0; /* Critical for enabling scrolling in children */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -236,7 +236,7 @@ html[dark] .task-section {
 }
 
 .content-scrollbox {
-  overflow-y: auto;
+  overflow-y: auto !important; /* Ensure scrollbar appears */
   flex: 1;
   min-height: 0; /* Key for enabling scrolling in flex children */
   padding-right: 8px;
