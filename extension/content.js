@@ -117,8 +117,19 @@ function renderOverlay() {
             </div>
 
             <div class="sum-footer">
-                ${(currentTask.stage === 'done' || currentTask.stage === 'cached') && active !== 'transcript' ? `<button class="action-btn" id="regen-active-btn">🔄 Neu generieren</button>` : ''}
-                <button class="action-btn" id="yt-sum-btn-full-reset">🔥 Audio-Reset</button>
+                ${
+                  (currentTask.stage === 'done' || currentTask.stage === 'cached') &&
+                  active !== 'transcript'
+                    ? `<button class="action-btn" id="regen-active-btn">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                    Neu generieren
+                   </button>`
+                    : ''
+                }
+                <button class="action-btn" id="yt-sum-btn-full-reset">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Audio-Reset
+                </button>
                 <button class="action-btn" id="yt-sum-btn-archive">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
                     Archiv
