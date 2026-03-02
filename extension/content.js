@@ -36,6 +36,9 @@ async function triggerNewAnalysis(summaryType) {
   });
 }
 
+window.startSummarize = startSummarize;
+window.triggerNewAnalysis = triggerNewAnalysis;
+
 function injectHeaderButtons() {
   const logoContainer = document.querySelector('ytd-masthead #start');
   if (!logoContainer || document.getElementById('yt-sum-dropdown-container')) return;

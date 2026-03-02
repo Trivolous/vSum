@@ -3,8 +3,7 @@ function parseMarkdown(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/^[\-\*] (.*$)/gim, '• $1')
-    .replace(/
-/g, '<br>');
+    .replace(/\n/g, '<br>');
 }
 
 window.parseMarkdown = parseMarkdown;
