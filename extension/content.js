@@ -1,4 +1,4 @@
-console.log('YouTube Summarizer (v4.9) - Enhanced Transcript View.');
+console.log('YouTube Summarizer (v5.0) - Dropdown UI & Relocation.');
 
 let currentVideoState = {
   videoId: null,
@@ -34,10 +34,22 @@ function attachGlobalListeners() {
   window.addEventListener('mousedown', (e) => {
     const panel = document.getElementById('yt-sum-overlay');
     if (panel && panel.style.display === 'flex' && !panel.contains(e.target)) {
-      // Do not close if clicking one of the trigger buttons
-      if (!e.target.closest('.yt-sum-btn')) {
+      // Do not close if clicking the dropdown or trigger buttons
+      if (!e.target.closest('.yt-sum-dropdown-container')) {
         panel.style.display = 'none';
       }
+    }
+
+    // Close dropdown menu if clicking outside
+    const dropdownMenu = document.getElementById('yt-sum-dropdown-menu');
+    const dropdownBtn = document.getElementById('yt-sum-main-btn');
+    if (
+      dropdownMenu &&
+      dropdownMenu.style.display === 'flex' &&
+      !dropdownMenu.contains(e.target) &&
+      !dropdownBtn.contains(e.target)
+    ) {
+      dropdownMenu.style.display = 'none';
     }
   });
 
@@ -94,7 +106,7 @@ function renderOverlay() {
         <div class="yt-sum-drag-handle">
             <h3 class="yt-sum-title">${currentVideoState.title}</h3>
             <button class="close-btn" id="yt-sum-close-x">
-                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </button>
         </div>
         <div class="yt-sum-panel-content">
@@ -147,9 +159,9 @@ function renderOverlay() {
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     Clear Cache
                 </button>
-                <button class="action-btn" id="yt-sum-btn-archive">
-                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
-                    Archive
+                <button class="action-btn" id="yt-sum-btn-full-reset" title="Clear the saved summary and transcript from your browser.">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Clear Cache
                 </button>
             </div>
         </div>
@@ -187,7 +199,6 @@ function renderOverlay() {
       const videoId = new URL(window.location.href).searchParams.get('v');
       chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
 
-      // Reset local state
       currentVideoState = {
         videoId: videoId,
         activeTab: currentVideoState.activeTab,
@@ -259,7 +270,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 async function startSummarize(url, summaryType) {
   const videoId = new URL(url).searchParams.get('v');
-  currentVideoState.activeTab = summaryType;
+  currentVideoState.activeTab = summaryType === 'detailed' ? 'normal' : summaryType;
   currentVideoState.title = document.title.replace(' - YouTube', '');
   const { yt_summaries = [] } = await chrome.storage.local.get('yt_summaries');
   const existing = yt_summaries.find((s) => s.url.includes(videoId));
@@ -273,73 +284,93 @@ async function startSummarize(url, summaryType) {
     currentVideoState.wordCount = existing.transcript ? existing.transcript.split(/\s+/).length : 0;
     renderOverlay();
   } else {
-    triggerNewAnalysis(summaryType);
+    triggerNewAnalysis(summaryType === 'detailed' ? 'normal' : summaryType);
   }
 }
 
 async function triggerNewAnalysis(summaryType) {
   const settings = await chrome.storage.local.get(['selected_model']);
   if (summaryType === 'short') currentVideoState.short.stage = 'start';
-  if (summaryType === 'normal') currentVideoState.normal.stage = 'start';
+  if (summaryType === 'normal' || summaryType === 'detailed')
+    currentVideoState.normal.stage = 'start';
   currentVideoState.transcript.stage = 'start';
   renderOverlay();
   chrome.runtime.sendMessage({
     action: 'summarize',
     url: window.location.href,
     title: document.title.replace(' - YouTube', ''),
-    summaryType: summaryType,
+    summaryType: summaryType === 'detailed' ? 'normal' : summaryType,
     model: settings.selected_model,
     existingTranscript: currentVideoState.cachedTranscript,
   });
 }
 
 function injectHeaderButtons() {
-  const endContainer = document.querySelector('#end.style-scope.ytd-masthead #buttons');
-  if (!endContainer || document.getElementById('yt-sum-header-group')) return;
+  const logoContainer = document.querySelector('ytd-masthead #start');
+  if (!logoContainer || document.getElementById('yt-sum-dropdown-container')) return;
 
-  const group = document.createElement('div');
-  group.id = 'yt-sum-header-group';
-  group.style.display = 'flex';
-  group.style.alignItems = 'center';
-  group.style.marginRight = '12px';
+  const container = document.createElement('div');
+  container.id = 'yt-sum-dropdown-container';
+  container.className = 'yt-sum-dropdown-container';
 
-  const dashBtn = document.createElement('button');
-  dashBtn.className = 'yt-sum-btn dash';
-  dashBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
-        </svg>
-        Archive
+  container.innerHTML = `
+        <button class="yt-sum-main-btn" id="yt-sum-main-btn">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+            Summary
+            <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: currentColor;"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="yt-sum-dropdown-menu" id="yt-sum-dropdown-menu">
+            <div class="yt-sum-dropdown-item" data-action="archive">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+                Archive
+            </div>
+            <div class="yt-sum-dropdown-item" data-action="short">
+                <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                Short
+            </div>
+            <div class="yt-sum-dropdown-item" data-action="normal">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                Normal
+            </div>
+            <div class="yt-sum-dropdown-item" data-action="detailed">
+                <svg viewBox="0 0 24 24"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
+                Detailed
+            </div>
+        </div>
     `;
-  dashBtn.onclick = () => chrome.runtime.sendMessage({ action: 'open_dashboard' });
-  group.appendChild(dashBtn);
 
-  if (window.location.pathname === '/watch') {
-    const sBtn = document.createElement('button');
-    sBtn.className = 'yt-sum-btn short';
-    sBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
-                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-            </svg>
-            Short
-        `;
-    sBtn.onclick = () => startSummarize(window.location.href, 'short');
-
-    const nBtn = document.createElement('button');
-    nBtn.className = 'yt-sum-btn norm';
-    nBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
-                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
-            </svg>
-            Normal
-        `;
-    nBtn.onclick = () => startSummarize(window.location.href, 'normal');
-
-    group.appendChild(sBtn);
-    group.appendChild(nBtn);
+  // Inject right after the logo
+  const logo = logoContainer.querySelector('ytd-topbar-logo-renderer');
+  if (logo) {
+    logo.parentNode.insertBefore(container, logo.nextSibling);
+  } else {
+    logoContainer.appendChild(container);
   }
 
-  // Inject before the user profile/buttons group in the header
-  endContainer.parentNode.insertBefore(group, endContainer);
+  // Dropdown Logic
+  const btn = document.getElementById('yt-sum-main-btn');
+  const menu = document.getElementById('yt-sum-dropdown-menu');
+
+  btn.onclick = () => {
+    const isVisible = menu.style.display === 'flex';
+    menu.style.display = isVisible ? 'none' : 'flex';
+  };
+
+  container.querySelectorAll('.yt-sum-dropdown-item').forEach((item) => {
+    item.onclick = () => {
+      const action = item.getAttribute('data-action');
+      menu.style.display = 'none';
+
+      if (action === 'archive') {
+        chrome.runtime.sendMessage({ action: 'open_dashboard' });
+      } else {
+        startSummarize(window.location.href, action);
+      }
+    };
+  });
+
+  attachGlobalListeners();
 }
+
+// Ensure the dropdown stays responsive and attached
 setInterval(injectHeaderButtons, 2000);

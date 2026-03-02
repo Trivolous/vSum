@@ -132,10 +132,14 @@ app.get('/process-video', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: modelName || 'gemini-3.1-pro' });
 
     let prompt = `TRANSCRIPT: "${transcriptText}"\n\nSummarize this in ENGLISH.\n`;
-    prompt +=
-      summaryType === 'short'
-        ? 'Short summary.'
-        : 'Detailed summary using bullet points for key information.';
+    if (summaryType === 'short') {
+      prompt += 'Short summary.';
+    } else if (summaryType === 'detailed') {
+      prompt +=
+        'Provide a very long, exhaustive and detailed summary. Use bullet points and sections to organize the information. Cover every single point discussed in the video.';
+    } else {
+      prompt += 'Detailed summary using bullet points for key information.';
+    }
     prompt += `\n\nAnswer ONLY as JSON: {"short_summary": "...", "normal_summary": "..."}`;
 
     const result = await model.generateContent(prompt);

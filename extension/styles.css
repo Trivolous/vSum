@@ -28,6 +28,96 @@ html[dark] #yt-sum-overlay {
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
 }
 
+/* Summary Dropdown UI */
+.yt-sum-dropdown-container {
+  position: relative;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.yt-sum-main-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0f0f0f;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+html[dark] .yt-sum-main-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f1f1f1;
+}
+
+.yt-sum-main-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .yt-sum-main-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.yt-sum-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  min-width: 200px;
+  z-index: 10001;
+  display: none;
+  flex-direction: column;
+}
+
+html[dark] .yt-sum-dropdown-menu {
+  background: #282828;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.yt-sum-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f0f0f;
+  transition: background-color 0.2s;
+}
+
+html[dark] .yt-sum-dropdown-item {
+  color: #f1f1f1;
+}
+
+.yt-sum-dropdown-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .yt-sum-dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.yt-sum-dropdown-item svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
 .yt-sum-drag-handle {
   flex: 0 0 52px;
   padding: 0 16px;
@@ -150,6 +240,23 @@ html[dark] .task-section {
   display: block;
 }
 
+/* Force scrollbar to be visible */
+.content-scrollbox::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+.content-scrollbox::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+.content-scrollbox::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+html[dark] .content-scrollbox::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .result-text {
   font-size: 14px;
   line-height: 1.5;
@@ -225,57 +332,7 @@ html[dark] .close-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Reusing your existing styles for other components */
-.result-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #0f0f0f;
-}
-html[dark] .result-text {
-  color: #f1f1f1;
-}
-.tab-btn {
-  flex: 1;
-  padding: 12px 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  color: #606060;
-  border-bottom: 2px solid transparent;
-}
-.tab-btn.active {
-  color: #f00;
-  border-bottom: 2px solid #f00;
-}
-html[dark] .tab-btn.active {
-  color: #ff4e4e;
-  border-bottom: 2px solid #ff4e4e;
-}
-/* ... keep rest of styles ... */
-.yt-sum-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 18px;
-  border: none;
-  cursor: pointer;
-  font-family: 'Roboto', 'Arial', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #0f0f0f;
-  margin-right: 8px;
-  white-space: nowrap;
-}
-html[dark] .yt-sum-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #f1f1f1;
-}
-/* Popup Styles ... */
+/* Popup Styles */
 body.popup-body {
   width: 380px;
   margin: 0;
@@ -284,26 +341,47 @@ body.popup-body {
   background-color: #ffffff;
   color: #0f0f0f;
 }
+
 html[dark] body.popup-body {
   background-color: #0f0f0f;
   color: #f1f1f1;
 }
+
 .popup-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
 }
+
+.popup-header h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
 .config-group {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
 .input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
+.input-wrapper label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #606060;
+}
+
+html[dark] .input-wrapper label {
+  color: #aaa;
+}
+
 .input-wrapper input,
 .input-wrapper select {
   height: 40px;
@@ -313,12 +391,14 @@ html[dark] body.popup-body {
   background: white;
   outline: none;
 }
+
 html[dark] .input-wrapper input,
 html[dark] .input-wrapper select {
   background: #1a1a1a;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #f1f1f1;
 }
+
 .save-btn {
   flex: 1;
   height: 36px;
@@ -329,6 +409,7 @@ html[dark] .input-wrapper select {
   font-weight: 500;
   cursor: pointer;
 }
+
 .secondary-btn {
   padding: 0 16px;
   height: 36px;
@@ -339,6 +420,7 @@ html[dark] .input-wrapper select {
   font-weight: 500;
   cursor: pointer;
 }
+
 html[dark] .secondary-btn {
   background-color: rgba(255, 255, 255, 0.1);
   color: #f1f1f1;
