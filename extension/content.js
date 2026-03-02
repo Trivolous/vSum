@@ -168,7 +168,22 @@ function renderOverlay() {
     chrome.runtime.sendMessage({ action: 'open_dashboard' });
   document.getElementById('yt-sum-btn-full-reset').onclick = () => {
     if (confirm('Löschen?')) {
-      chrome.runtime.sendMessage({ action: 'delete_summary', url: window.location.href });
+      const videoId = new URL(window.location.href).searchParams.get('v');
+      chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
+
+      // Reset local state
+      currentVideoState = {
+        videoId: videoId,
+        activeTab: currentVideoState.activeTab,
+        title: currentVideoState.title,
+        cachedTranscript: null,
+        audioUrl: null,
+        wordCount: 0,
+        short: { stage: 'idle', percent: 0, data: null, message: '' },
+        normal: { stage: 'idle', percent: 0, data: null, message: '' },
+        transcript: { stage: 'idle', percent: 0, data: null, message: '' },
+      };
+
       panel.style.display = 'none';
     }
   };

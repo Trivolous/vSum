@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
   }
   if (message.action === 'delete_summary') {
-    deleteSummary(message.url);
+    deleteSummary(message.videoId);
   }
   if (message.action === 'delete_partial') {
     deletePartial(message.url, message.type);
@@ -126,9 +126,10 @@ async function saveToArchiveWithHistory(msg, resultData) {
   await chrome.storage.local.set({ [storageKey]: yt_summaries });
 }
 
-async function deleteSummary(url) {
+async function deleteSummary(videoId) {
+  if (!videoId) return;
   const { yt_summaries = [] } = await chrome.storage.local.get('yt_summaries');
-  const filtered = yt_summaries.filter((s) => s.url !== url);
+  const filtered = yt_summaries.filter((s) => !s.url.includes(videoId));
   await chrome.storage.local.set({ yt_summaries: filtered });
 }
 
