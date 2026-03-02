@@ -70,27 +70,28 @@ app.get('/process-video', async (req, res) => {
         });
       }
 
-      // 2. Transkription mit Universal-3 Pro
-      sendStatus('uploading', 0, 'AssemblyAI Universal-3 Pro Analyse...');
+      // 2. Transkription mit Fallback-Support
+      sendStatus('uploading', 0, 'AssemblyAI Analyse...');
       const client = new AssemblyAI({ apiKey: aai_key });
 
       const transcript = await client.transcripts.transcribe({
         audio: audioPath,
-        speech_models: ['universal-3-pro'],
+        // Nutze universal-3-pro als primär, universal-2 als Fallback für 99+ Sprachen (z.B. Türkisch)
+        speech_models: ['universal-3-pro', 'universal-2'],
         language_detection: true,
         punctuate: true,
         format_text: true,
-        filter_profanity: false, // Wir wollen alles hören
+        filter_profanity: false,
       });
 
       if (transcript.status === 'error') throw new Error(transcript.error);
       transcriptText = transcript.text;
     }
 
-    // 3. Zusammenfassung (Sicher gegen Überschreiben)
+    // 3. Zusammenfassung
     sendStatus('summarizing', 0, 'Gemini erstellt Zusammenfassung...');
     const genAI = new GoogleGenerativeAI(gemini_key);
-    const model = genAI.getGenerativeModel({ model: modelName || 'gemini-3.1-pro-preview' });
+    const model = genAI.getGenerativeModel({ model: modelName || 'gemini-3.1-pro' });
 
     let prompt = `TRANSKRIPT: "${transcriptText}"\n\nFasse das auf DEUTSCH zusammen.\n`;
     prompt += summaryType === 'short' ? 'Kurz.' : 'Ausführlich.';

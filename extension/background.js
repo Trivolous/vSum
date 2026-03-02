@@ -16,13 +16,24 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 
 async function handleSummarizeStream(msg, tabId) {
   try {
-    const settings = await chrome.storage.local.get(['backend_url', 'gemini_key', 'aai_key']);
+    const settings = await chrome.storage.local.get([
+      'backend_url',
+      'gemini_key',
+      'aai_key',
+      'gemini_model',
+      'aai_model',
+      'custom_model_name',
+    ]);
     const backendUrl = settings.backend_url || 'http://localhost:5000';
+
+    const selectedGeminiModel =
+      settings.gemini_model === 'custom' ? settings.custom_model_name : settings.gemini_model;
 
     const params = new URLSearchParams({
       url: msg.url,
       summaryType: msg.summaryType,
-      modelName: msg.model,
+      modelName: selectedGeminiModel || 'gemini-3.1-pro',
+      aai_model: settings.aai_model || 'universal-3-pro',
       gemini_key: settings.gemini_key,
       aai_key: settings.aai_key,
     });

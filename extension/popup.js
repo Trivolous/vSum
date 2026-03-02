@@ -1,60 +1,56 @@
-const modelSelect = document.getElementById('model-select');
-const customContainer = document.getElementById('custom-model-container');
-const customInput = document.getElementById('custom-model-input');
+document.addEventListener('DOMContentLoaded', async () => {
+  const {
+    backend_url = 'http://localhost:5000',
+    gemini_key = '',
+    aai_key = '',
+    gemini_model = 'gemini-3.1-pro',
+    aai_model = 'universal-3-pro',
+    custom_model_name = '',
+  } = await chrome.storage.local.get([
+    'backend_url',
+    'gemini_key',
+    'aai_key',
+    'gemini_model',
+    'aai_model',
+    'custom_model_name',
+  ]);
 
-modelSelect.addEventListener('change', () => {
-  customContainer.style.display = modelSelect.value === 'custom' ? 'block' : 'none';
-});
+  document.getElementById('backend_url').value = backend_url;
+  document.getElementById('gemini_key').value = gemini_key;
+  document.getElementById('aai_key').value = aai_key;
+  document.getElementById('gemini_model').value = gemini_model;
+  document.getElementById('aai_model').value = aai_model;
+  document.getElementById('custom_model_name').value = custom_model_name;
 
-document.getElementById('save-settings').addEventListener('click', () => {
-  const backend_url =
-    document.getElementById('backend-url').value.trim() || 'http://localhost:5000';
-  const gemini_key = document.getElementById('gemini-key').value.trim();
-  const aai_key = document.getElementById('aai-key').value.trim();
-  const selectedModel = modelSelect.value;
-  const customModel = customInput.value.trim();
-
-  const modelToSave = selectedModel === 'custom' ? customModel : selectedModel;
-
-  chrome.storage.local.set(
-    {
-      backend_url,
-      gemini_key,
-      aai_key,
-      selected_model: modelToSave,
-      ui_selected_type: selectedModel,
-    },
-    () => {
-      const status = document.getElementById('status-msg');
-      status.style.display = 'block';
-      setTimeout(() => {
-        status.style.display = 'none';
-      }, 2000);
-    }
-  );
-});
-
-document.getElementById('open-archive').addEventListener('click', (e) => {
-  e.preventDefault();
-  chrome.runtime.sendMessage({ action: 'open_dashboard' });
-});
-
-// Load current settings
-chrome.storage.local.get(
-  ['backend_url', 'gemini_key', 'aai_key', 'selected_model', 'ui_selected_type'],
-  (data) => {
-    document.getElementById('backend-url').value = data.backend_url || 'http://localhost:5000';
-    if (data.gemini_key) document.getElementById('gemini-key').value = data.gemini_key;
-    if (data.aai_key) document.getElementById('aai-key').value = data.aai_key;
-
-    if (data.ui_selected_type) {
-      modelSelect.value = data.ui_selected_type;
-      if (data.ui_selected_type === 'custom') {
-        customContainer.style.display = 'block';
-        customInput.value = data.selected_model;
-      }
-    } else if (data.selected_model) {
-      modelSelect.value = data.selected_model;
-    }
+  if (gemini_model === 'custom') {
+    document.getElementById('custom_model_wrapper').style.display = 'flex';
   }
-);
+
+  document.getElementById('gemini_model').addEventListener('change', (e) => {
+    document.getElementById('custom_model_wrapper').style.display =
+      e.target.value === 'custom' ? 'flex' : 'none';
+  });
+
+  document.getElementById('save').addEventListener('click', async () => {
+    const data = {
+      backend_url: document.getElementById('backend_url').value,
+      gemini_key: document.getElementById('gemini_key').value,
+      aai_key: document.getElementById('aai_key').value,
+      gemini_model: document.getElementById('gemini_model').value,
+      aai_model: document.getElementById('aai_model').value,
+      custom_model_name: document.getElementById('custom_model_name').value,
+    };
+    await chrome.storage.local.set(data);
+    const btn = document.getElementById('save');
+    btn.innerText = 'Gespeichert!';
+    btn.style.backgroundColor = '#2ba640';
+    setTimeout(() => {
+      btn.innerText = 'Speichern';
+      btn.style.backgroundColor = '#cc0000';
+    }, 2000);
+  });
+
+  document.getElementById('open_dashboard').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'open_dashboard' });
+  });
+});

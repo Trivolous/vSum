@@ -1,7 +1,7 @@
 /* Multi-Tasking Tabbed Overlay */
 #yt-sum-overlay {
   position: fixed;
-  top: 100px; /* Start at a fixed position to allow dragging */
+  top: 100px;
   right: 20px;
   width: 550px;
   min-width: 300px;
@@ -10,14 +10,123 @@
   z-index: 10000;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
-  padding: 0; /* Changed to 0 to handle internal spacing with drag area */
+  padding: 0;
   font-family: 'Roboto', 'Arial', sans-serif;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
   resize: both;
-  overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Popup Styles */
+body.popup-body {
+  width: 380px;
+  margin: 0;
+  padding: 16px;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  background-color: #ffffff;
+  color: #0f0f0f;
+}
+
+html[dark] body.popup-body {
+  background-color: #0f0f0f;
+  color: #f1f1f1;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.popup-header h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-wrapper label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #606060;
+}
+
+html[dark] .input-wrapper label {
+  color: #aaa;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  font-size: 14px;
+  outline: none;
+}
+
+html[dark] .input-wrapper input,
+html[dark] .input-wrapper select {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f1f1;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  border: 1px solid #065fd4;
+}
+
+.popup-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.save-btn {
+  flex: 1;
+  height: 36px;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #990000;
+}
+
+.secondary-btn {
+  padding: 0 16px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0f0f0f;
+  border: none;
+  border-radius: 18px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+html[dark] .secondary-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f1f1f1;
 }
 
 html[dark] #yt-sum-overlay {
