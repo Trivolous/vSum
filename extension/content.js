@@ -139,9 +139,13 @@ function renderOverlay() {
                    </button>`
                     : ''
                 }
-                <button class="action-btn" id="yt-sum-btn-full-reset">
+                <button class="action-btn" id="yt-sum-btn-purge-file" title="Permanently delete the downloaded audio file from the server.">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6l-1 1H2v2h12V5z"/></svg>
+                    Delete Audio
+                </button>
+                <button class="action-btn" id="yt-sum-btn-full-reset" title="Clear the saved summary and transcript from your browser.">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Audio Reset
+                    Clear Cache
                 </button>
                 <button class="action-btn" id="yt-sum-btn-archive">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
@@ -166,6 +170,18 @@ function renderOverlay() {
   };
   document.getElementById('yt-sum-btn-archive').onclick = () =>
     chrome.runtime.sendMessage({ action: 'open_dashboard' });
+
+  document.getElementById('yt-sum-btn-purge-file').onclick = () => {
+    if (confirm('Delete backend audio file? This forces a redownload on next analysis.')) {
+      const videoId = new URL(window.location.href).searchParams.get('v');
+      chrome.runtime.sendMessage({ action: 'delete_audio', videoId: videoId });
+
+      // Update local state to reflect audio is gone (optional but good UI)
+      currentVideoState.audioUrl = null;
+      renderOverlay();
+    }
+  };
+
   document.getElementById('yt-sum-btn-full-reset').onclick = () => {
     if (confirm('Delete?')) {
       const videoId = new URL(window.location.href).searchParams.get('v');
