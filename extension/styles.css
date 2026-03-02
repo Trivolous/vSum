@@ -138,6 +138,7 @@ html[dark] #yt-sum-overlay {
 }
 
 .yt-sum-drag-handle {
+  flex-shrink: 0; /* Header stays visible */
   height: 40px;
   padding: 0 16px;
   display: flex;
@@ -156,7 +157,7 @@ html[dark] .yt-sum-drag-handle {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
+  min-height: 0; /* Allow the panel to shrink */
   padding: 16px;
   box-sizing: border-box;
 }
@@ -173,7 +174,7 @@ html[dark] .yt-sum-drag-handle {
 
 .tab-bar {
   display: flex;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Tabs stay visible */
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
@@ -222,7 +223,7 @@ html[dark] .tab-btn.active {
   border-radius: 8px;
   padding: 16px;
   flex: 1;
-  min-height: 0;
+  min-height: 0; /* Key for enabling scrolling in children */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -237,6 +238,7 @@ html[dark] .task-section {
 .content-scrollbox {
   overflow-y: auto;
   flex: 1;
+  min-height: 0; /* Key for enabling scrolling in flex children */
   padding-right: 8px;
 }
 
@@ -252,7 +254,7 @@ html[dark] .result-text {
 
 .sum-footer {
   display: flex;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Footer stays visible */
   gap: 8px;
   margin-top: 16px;
   justify-content: flex-end;
