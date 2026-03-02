@@ -38,11 +38,17 @@ app.get('/process-video', async (req, res) => {
   try {
     const videoId = new URL(url).searchParams.get('v');
 
-    // Check if any audio file for this video ID already exists
-    const existingFiles = fs
-      .readdirSync(audioStore)
-      .filter((f) => f.startsWith(`audio_${videoId}.`));
-    let audioFilename = existingFiles.length > 0 ? existingFiles[0] : null;
+    // Helper to find a valid, finished audio file in cache
+    const findAudioFile = (vId) => {
+      const validExtensions = ['.m4a', '.webm', '.mp3', '.wav', '.ogg'];
+      const files = fs.readdirSync(audioStore);
+      return files.find((f) => {
+        const ext = path.extname(f).toLowerCase();
+        return f.startsWith(`audio_${vId}.`) && validExtensions.includes(ext);
+      });
+    };
+
+    let audioFilename = findAudioFile(videoId);
     let audioPath = audioFilename ? path.join(audioStore, audioFilename) : null;
 
     let transcriptText = existingTranscript;
@@ -54,8 +60,16 @@ app.get('/process-video', async (req, res) => {
         : 'yt-dlp';
 
       if (!audioPath) {
+        // Force m4a (native AAC) for best compatibility, fallback to best audio
         const outputTemplate = path.join(audioStore, `audio_${videoId}.%(ext)s`);
-        const ytDlp = spawn(ytDlpPath, ['-f', 'ba', '-o', outputTemplate, url]);
+        const ytDlp = spawn(ytDlpPath, [
+          '-f',
+          'ba[ext=m4a]/ba',
+          '--no-playlist',
+          '-o',
+          outputTemplate,
+          url,
+        ]);
         await new Promise((resolve, reject) => {
           ytDlp.stdout.on('data', (d) => {
             const m = d.toString().match(/(\d+\.\d+)%/);
@@ -67,12 +81,10 @@ app.get('/process-video', async (req, res) => {
           });
         });
 
-        // Find the newly downloaded file to get its real extension
-        const newFiles = fs
-          .readdirSync(audioStore)
-          .filter((f) => f.startsWith(`audio_${videoId}.`));
-        if (newFiles.length === 0) throw new Error('Download failed: file not found');
-        audioFilename = newFiles[0];
+        // Re-check for the finished file
+        audioFilename = findAudioFile(videoId);
+        if (!audioFilename)
+          throw new Error('Download failed: file not found or unsupported format');
         audioPath = path.join(audioStore, audioFilename);
       }
 

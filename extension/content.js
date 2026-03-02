@@ -118,7 +118,11 @@ function renderOverlay() {
                   active === 'transcript' && currentVideoState.audioUrl
                     ? `
                     <div class="audio-player-container">
-                        <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}"></audio>
+                        <audio controls 
+                               src="${currentVideoState.audioUrl}" 
+                               style="width: 100%; height: 32px;"
+                               onerror="this.insertAdjacentHTML('afterend', '<p style=\'color:red;font-size:10px;margin-top:4px;\'>Audio load failed. Try resetting audio.</p>')">
+                        </audio>
                     </div>
                 `
                     : ''
