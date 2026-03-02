@@ -80,20 +80,31 @@ function renderOverlay() {
   panel.innerHTML = `
         <div class="yt-sum-drag-handle">
             <h3 class="yt-sum-title">${currentVideoState.title}</h3>
-            <button class="close-btn" id="yt-sum-close-x">×</button>
+            <button class="close-btn" id="yt-sum-close-x">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
         </div>
         <div class="yt-sum-panel-content">
             <div class="tab-bar">
-                <button class="tab-btn ${active === 'short' ? 'active' : ''}" id="tab-short-btn">⚡ Kurz</button>
-                <button class="tab-btn ${active === 'normal' ? 'active' : ''}" id="tab-normal-btn">📄 Normal</button>
-                <button class="tab-btn ${active === 'transcript' ? 'active' : ''}" id="tab-transcript-btn">📜 Transkript</button>
+                <button class="tab-btn ${active === 'short' ? 'active' : ''}" id="tab-short-btn">
+                    <svg viewBox="0 0 24 24" class="tab-icon"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                    Kurz
+                </button>
+                <button class="tab-btn ${active === 'normal' ? 'active' : ''}" id="tab-normal-btn">
+                    <svg viewBox="0 0 24 24" class="tab-icon"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                    Normal
+                </button>
+                <button class="tab-btn ${active === 'transcript' ? 'active' : ''}" id="tab-transcript-btn">
+                    <svg viewBox="0 0 24 24" class="tab-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+                    Transkript
+                </button>
             </div>
 
             <div id="tab-content" class="task-section ${currentTask.stage}">
                 ${
                   active === 'transcript' && currentVideoState.audioUrl
                     ? `
-                    <div class="audio-player-container" style="margin-bottom: 12px;">
+                    <div class="audio-player-container">
                         <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}" type="audio/mpeg"></audio>
                     </div>
                 `
@@ -108,7 +119,10 @@ function renderOverlay() {
             <div class="sum-footer">
                 ${(currentTask.stage === 'done' || currentTask.stage === 'cached') && active !== 'transcript' ? `<button class="action-btn" id="regen-active-btn">🔄 Neu generieren</button>` : ''}
                 <button class="action-btn" id="yt-sum-btn-full-reset">🔥 Audio-Reset</button>
-                <button class="action-btn" id="yt-sum-btn-archive">Archiv</button>
+                <button class="action-btn" id="yt-sum-btn-archive">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+                    Archiv
+                </button>
             </div>
         </div>
     `;

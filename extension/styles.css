@@ -4,11 +4,11 @@
   top: 100px;
   right: 20px;
   width: 550px;
-  min-width: 450px; /* Increased to ensure buttons always fit on one line */
+  min-width: 450px;
   min-height: 350px;
   background: white;
   z-index: 10000;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   padding: 0;
   font-family: 'Roboto', 'Arial', sans-serif;
@@ -16,36 +16,51 @@
   display: flex !important;
   flex-direction: column !important;
   resize: both;
-  overflow: hidden !important; /* Critical for resize and clipping */
+  overflow: hidden !important;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
 html[dark] #yt-sum-overlay {
-  background: #212121;
+  background: #282828; /* YouTube dark theme color */
   color: #f1f1f1;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
 }
 
 .yt-sum-drag-handle {
-  flex: 0 0 48px;
+  flex: 0 0 52px;
   padding: 0 16px;
   display: flex;
   align-items: center;
   cursor: move;
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+}
+
+html[dark] .yt-sum-drag-handle {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .yt-sum-panel-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 0; /* Force flex to control height, preventing expansion */
+  height: 0;
   padding: 16px;
   box-sizing: border-box;
   min-height: 0;
+}
+
+.yt-sum-title {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab-bar {
@@ -55,13 +70,62 @@ html[dark] #yt-sum-overlay {
   margin-bottom: 16px;
 }
 
+html[dark] .tab-bar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: #606060;
+  font-size: 14px;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+html[dark] .tab-btn {
+  color: #aaa;
+}
+
+.tab-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #0f0f0f;
+  border-bottom: 2px solid #0f0f0f;
+}
+
+html[dark] .tab-btn.active {
+  color: #f1f1f1;
+  border-bottom: 2px solid #f1f1f1;
+}
+
 .task-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 0; /* Force flex to control height */
+  height: 0;
   background: #f9f9f9;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
   min-height: 0;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -69,8 +133,13 @@ html[dark] #yt-sum-overlay {
 }
 
 html[dark] .task-section {
-  background: #1a1a1a;
+  background: #1e1e1e;
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.audio-player-container {
+  flex: 0 0 auto;
+  margin-bottom: 16px;
 }
 
 .content-scrollbox {
@@ -81,21 +150,14 @@ html[dark] .task-section {
   display: block;
 }
 
-/* Force scrollbar to be visible */
-.content-scrollbox::-webkit-scrollbar {
-  width: 8px !important;
-  display: block !important;
+.result-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f0f0f;
 }
-.content-scrollbox::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-.content-scrollbox::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-html[dark] .content-scrollbox::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+
+html[dark] .result-text {
+  color: #f1f1f1;
 }
 
 .sum-footer {
@@ -111,32 +173,56 @@ html[dark] .content-scrollbox::-webkit-scrollbar-thumb {
   padding: 0 16px;
   height: 36px;
   border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: white;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0f0f0f;
   cursor: pointer;
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 html[dark] .action-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
   color: #f1f1f1;
 }
 
+.action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 .close-btn {
-  font-size: 20px;
   cursor: pointer;
   border: none;
   background: none;
   color: #606060;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  margin-right: -8px;
+}
+
+html[dark] .close-btn {
+  color: #f1f1f1;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Reusing your existing styles for other components */
