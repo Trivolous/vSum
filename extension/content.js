@@ -20,24 +20,37 @@ function parseMarkdown(text) {
     .replace(/\n/g, '<br>');
 }
 
+// Global event listeners (attached once)
+function attachGlobalListeners() {
+  if (window.ytSumListenersAttached) return;
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const panel = document.getElementById('yt-sum-overlay');
+      if (panel) panel.style.display = 'none';
+    }
+  });
+
+  window.addEventListener('mousedown', (e) => {
+    const panel = document.getElementById('yt-sum-overlay');
+    if (panel && panel.style.display === 'block' && !panel.contains(e.target)) {
+      // Do not close if clicking one of the trigger buttons
+      if (!e.target.closest('.yt-sum-btn')) {
+        panel.style.display = 'none';
+      }
+    }
+  });
+
+  window.ytSumListenersAttached = true;
+}
+
 function renderOverlay() {
+  attachGlobalListeners();
   let panel = document.getElementById('yt-sum-overlay');
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'yt-sum-overlay';
     document.body.appendChild(panel);
-
-    // Close on Escape
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') panel.style.display = 'none';
-    });
-
-    // Close on click outside
-    window.addEventListener('mousedown', (e) => {
-      if (panel.style.display === 'block' && !panel.contains(e.target)) {
-        panel.style.display = 'none';
-      }
-    });
 
     // Dragging Logic
     let isDragging = false;
@@ -50,7 +63,7 @@ function renderOverlay() {
           x: e.clientX - panel.offsetLeft,
           y: e.clientY - panel.offsetTop,
         };
-        panel.style.transition = 'none'; // Disable transition while dragging
+        panel.style.transition = 'none';
       }
     });
 
