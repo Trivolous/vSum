@@ -7,6 +7,7 @@ let currentVideoState = {
   wordCount: 0,
   short: { stage: 'idle', percent: 0, data: null, message: '' },
   normal: { stage: 'idle', percent: 0, data: null, message: '' },
+  detailed: { stage: 'idle', percent: 0, data: null, message: '' },
   transcript: { stage: 'idle', percent: 0, data: null, message: '' },
 };
 

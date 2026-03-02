@@ -73,7 +73,13 @@ function renderOverlay() {
   const state = window.currentVideoState;
   const active = state.activeTab;
   let currentTask =
-    active === 'short' ? state.short : active === 'normal' ? state.normal : state.transcript;
+    active === 'short'
+      ? state.short
+      : active === 'normal'
+        ? state.normal
+        : active === 'detailed'
+          ? state.detailed
+          : state.transcript;
 
   panel.innerHTML = `
         <div class="yt-sum-drag-handle">
@@ -91,6 +97,10 @@ function renderOverlay() {
                 <button class="tab-btn ${active === 'normal' ? 'active' : ''}" id="tab-normal-btn">
                     <svg viewBox="0 0 24 24" class="tab-icon"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
                     Normal
+                </button>
+                <button class="tab-btn ${active === 'detailed' ? 'active' : ''}" id="tab-detailed-btn">
+                    <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
+                    Detailed
                 </button>
                 <button class="tab-btn ${active === 'transcript' ? 'active' : ''}" id="tab-transcript-btn">
                     <svg viewBox="0 0 24 24" class="tab-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
@@ -143,6 +153,10 @@ function renderOverlay() {
   };
   document.getElementById('tab-normal-btn').onclick = () => {
     state.activeTab = 'normal';
+    renderOverlay();
+  };
+  document.getElementById('tab-detailed-btn').onclick = () => {
+    state.activeTab = 'detailed';
     renderOverlay();
   };
   document.getElementById('tab-transcript-btn').onclick = () => {

@@ -103,6 +103,7 @@ async function saveToArchiveWithHistory(msg, resultData) {
       timestamp: entry.timestamp || new Date().toISOString(),
       short_summary: entry.short_summary,
       normal_summary: entry.normal_summary,
+      detailed_summary: entry.detailed_summary,
       model: entry.model || 'unknown',
     });
 
@@ -110,9 +111,11 @@ async function saveToArchiveWithHistory(msg, resultData) {
 
     if (msg.summaryType === 'short') entry.short_summary = resultData.short_summary;
     if (msg.summaryType === 'normal') entry.normal_summary = resultData.normal_summary;
+    if (msg.summaryType === 'detailed') entry.detailed_summary = resultData.detailed_summary;
     if (msg.summaryType === 'both') {
       entry.short_summary = resultData.short_summary;
       entry.normal_summary = resultData.normal_summary;
+      entry.detailed_summary = resultData.detailed_summary;
     }
 
     entry.transcript = resultData.transcript;
@@ -129,6 +132,7 @@ async function saveToArchiveWithHistory(msg, resultData) {
       transcript: resultData.transcript,
       short_summary: resultData.short_summary,
       normal_summary: resultData.normal_summary,
+      detailed_summary: resultData.detailed_summary,
       timestamp: new Date().toISOString(),
       model: msg.model,
       history: [],
@@ -151,6 +155,7 @@ async function deletePartial(url, type) {
   if (index >= 0) {
     if (type === 'short') yt_summaries[index].short_summary = null;
     if (type === 'normal') yt_summaries[index].normal_summary = null;
+    if (type === 'detailed') yt_summaries[index].detailed_summary = null;
     await chrome.storage.local.set({ yt_summaries });
   }
 }

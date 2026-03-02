@@ -140,7 +140,7 @@ app.get('/process-video', async (req, res) => {
     } else {
       prompt += 'Detailed summary using bullet points for key information.';
     }
-    prompt += `\n\nAnswer ONLY as JSON: {"short_summary": "...", "normal_summary": "..."}`;
+    prompt += `\n\nAnswer ONLY as JSON: {"short_summary": "...", "normal_summary": "...", "detailed_summary": "..."}`;
 
     const result = await model.generateContent(prompt);
     const geminiRaw = result.response.text();
@@ -153,6 +153,7 @@ app.get('/process-video', async (req, res) => {
       transcript: transcriptText, // This is the RAW AAI Transcript
       short_summary: summaryData.short_summary || 'Error',
       normal_summary: summaryData.normal_summary || 'Error',
+      detailed_summary: summaryData.detailed_summary || 'Error',
       audioUrl: `http://localhost:5000/audio/${audioFilename}`,
       wordCount: transcriptText.split(/\s+/).length,
     };

@@ -1,7 +1,7 @@
 async function startSummarize(url, summaryType) {
   const videoId = new URL(url).searchParams.get('v');
   const state = window.currentVideoState;
-  state.activeTab = summaryType === 'detailed' ? 'normal' : summaryType;
+  state.activeTab = summaryType;
   state.title = document.title.replace(' - YouTube', '');
   const { yt_summaries = [] } = await chrome.storage.local.get('yt_summaries');
   const existing = yt_summaries.find((s) => s.url.includes(videoId));
@@ -9,13 +9,14 @@ async function startSummarize(url, summaryType) {
   if (existing) {
     state.short = { stage: 'cached', data: existing.short_summary, percent: 100 };
     state.normal = { stage: 'cached', data: existing.normal_summary, percent: 100 };
+    state.detailed = { stage: 'cached', data: existing.detailed_summary, percent: 100 };
     state.transcript = { stage: 'cached', data: existing.transcript, percent: 100 };
     state.cachedTranscript = existing.transcript;
     state.audioUrl = existing.audioUrl;
     state.wordCount = existing.transcript ? existing.transcript.split(/\s+/).length : 0;
     window.renderOverlay();
   } else {
-    triggerNewAnalysis(summaryType === 'detailed' ? 'normal' : summaryType);
+    triggerNewAnalysis(summaryType);
   }
 }
 
@@ -23,14 +24,15 @@ async function triggerNewAnalysis(summaryType) {
   const settings = await chrome.storage.local.get(['selected_model']);
   const state = window.currentVideoState;
   if (summaryType === 'short') state.short.stage = 'start';
-  if (summaryType === 'normal' || summaryType === 'detailed') state.normal.stage = 'start';
+  if (summaryType === 'normal') state.normal.stage = 'start';
+  if (summaryType === 'detailed') state.detailed.stage = 'start';
   state.transcript.stage = 'start';
   window.renderOverlay();
   chrome.runtime.sendMessage({
     action: 'summarize',
     url: window.location.href,
     title: document.title.replace(' - YouTube', ''),
-    summaryType: summaryType === 'detailed' ? 'normal' : summaryType,
+    summaryType: summaryType,
     model: settings.selected_model,
     existingTranscript: state.cachedTranscript,
   });
@@ -112,12 +114,19 @@ chrome.runtime.onMessage.addListener((msg) => {
       state.short.data = msg.message.short_summary;
       state.normal.stage = 'done';
       state.normal.data = msg.message.normal_summary;
+      state.detailed.stage = 'done';
+      state.detailed.data = msg.message.detailed_summary;
       state.transcript.stage = 'done';
       state.cachedTranscript = msg.message.transcript;
       state.audioUrl = msg.message.audioUrl;
       state.wordCount = msg.message.wordCount || 0;
     } else {
-      const target = msg.summaryType === 'normal' ? state.normal : state.short;
+      const target =
+        msg.summaryType === 'normal'
+          ? state.normal
+          : msg.summaryType === 'detailed'
+            ? state.detailed
+            : state.short;
       target.stage = msg.stage;
       target.percent = msg.percent;
       target.message = msg.message;
