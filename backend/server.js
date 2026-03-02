@@ -23,6 +23,26 @@ app.use(
   express.static(audioStore)
 );
 
+app.get('/delete-audio', (req, res) => {
+  const { videoId } = req.query;
+  if (!videoId) return res.status(400).json({ success: false, error: 'No videoId provided' });
+
+  try {
+    const files = fs.readdirSync(audioStore);
+    const toDelete = files.filter((f) => f.startsWith(`audio_${videoId}.`));
+
+    toDelete.forEach((f) => {
+      fs.unlinkSync(path.join(audioStore, f));
+      console.log(`Deleted cached audio: ${f}`);
+    });
+
+    res.json({ success: true, deletedCount: toDelete.length });
+  } catch (err) {
+    console.error(`Error deleting audio for ${videoId}:`, err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/process-video', async (req, res) => {
   const { url, summaryType, modelName, gemini_key, aai_key, existingTranscript } = req.query;
 
