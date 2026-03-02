@@ -33,7 +33,7 @@ function attachGlobalListeners() {
 
   window.addEventListener('mousedown', (e) => {
     const panel = document.getElementById('yt-sum-overlay');
-    if (panel && panel.style.display === 'block' && !panel.contains(e.target)) {
+    if (panel && panel.style.display === 'flex' && !panel.contains(e.target)) {
       // Do not close if clicking one of the trigger buttons
       if (!e.target.closest('.yt-sum-btn')) {
         panel.style.display = 'none';
@@ -80,7 +80,7 @@ function renderOverlay() {
       isDragging = false;
     });
   }
-  panel.style.display = 'block';
+  panel.style.display = 'flex';
 
   const active = currentVideoState.activeTab;
   let currentTask =
