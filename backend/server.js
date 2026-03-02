@@ -48,7 +48,7 @@ app.get('/process-video', async (req, res) => {
     let transcriptText = existingTranscript;
 
     if (!transcriptText) {
-      sendStatus('downloading', 10, 'Video-Download (HQ Audio)...');
+      sendStatus('downloading', 10, 'Video Download (HQ Audio)...');
       const ytDlpPath = fs.existsSync(path.join(__dirname, 'yt-dlp.exe'))
         ? path.join(__dirname, 'yt-dlp.exe')
         : 'yt-dlp';
@@ -76,13 +76,13 @@ app.get('/process-video', async (req, res) => {
         audioPath = path.join(audioStore, audioFilename);
       }
 
-      // 2. Transkription mit Fallback-Support
-      sendStatus('uploading', 0, 'AssemblyAI Analyse...');
+      // 2. Transcription with Fallback Support
+      sendStatus('uploading', 0, 'AssemblyAI Analysis...');
       const client = new AssemblyAI({ apiKey: aai_key });
 
       const transcript = await client.transcripts.transcribe({
         audio: audioPath,
-        // Nutze universal-3-pro als primär, universal-2 als Fallback für 99+ Sprachen (z.B. Türkisch)
+        // Use universal-3-pro as primary, universal-2 as fallback for 99+ languages
         speech_models: ['universal-3-pro', 'universal-2'],
         language_detection: true,
         punctuate: true,
@@ -94,26 +94,26 @@ app.get('/process-video', async (req, res) => {
       transcriptText = transcript.text;
     }
 
-    // 3. Zusammenfassung
-    sendStatus('summarizing', 0, 'Gemini erstellt Zusammenfassung...');
+    // 3. Summarization
+    sendStatus('summarizing', 0, 'Gemini is generating summary...');
     const genAI = new GoogleGenerativeAI(gemini_key);
     const model = genAI.getGenerativeModel({ model: modelName || 'gemini-3.1-pro' });
 
-    let prompt = `TRANSKRIPT: "${transcriptText}"\n\nFasse das auf DEUTSCH zusammen.\n`;
-    prompt += summaryType === 'short' ? 'Kurz.' : 'Ausführlich.';
-    prompt += `\n\nAntworte NUR als JSON: {"short_summary": "...", "normal_summary": "..."}`;
+    let prompt = `TRANSCRIPT: "${transcriptText}"\n\nSummarize this in ENGLISH.\n`;
+    prompt += summaryType === 'short' ? 'Short.' : 'Detailed.';
+    prompt += `\n\nAnswer ONLY as JSON: {"short_summary": "...", "normal_summary": "..."}`;
 
     const result = await model.generateContent(prompt);
     const geminiRaw = result.response.text();
     const jsonMatch = geminiRaw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('KI antwortete nicht im JSON Format.');
+    if (!jsonMatch) throw new Error('AI did not respond in JSON format.');
     const summaryData = JSON.parse(jsonMatch[0]);
 
-    // WICHTIG: Wir bauen das Objekt EXPLIZIT zusammen
+    // IMPORTANT: We build the object EXPLICITLY
     const finalResult = {
-      transcript: transcriptText, // Das hier ist das ROHE AAI Transkript
-      short_summary: summaryData.short_summary || 'Fehler',
-      normal_summary: summaryData.normal_summary || 'Fehler',
+      transcript: transcriptText, // This is the RAW AAI Transcript
+      short_summary: summaryData.short_summary || 'Error',
+      normal_summary: summaryData.normal_summary || 'Error',
       audioUrl: `http://localhost:5000/audio/${audioFilename}`,
       wordCount: transcriptText.split(/\s+/).length,
     };
@@ -128,4 +128,4 @@ app.get('/process-video', async (req, res) => {
 });
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Smart-Backend (v1.0.0) Transkript-Sicherheit aktiv.`));
+app.listen(PORT, () => console.log(`Smart Backend (v1.0.0) Transcript security active.`));

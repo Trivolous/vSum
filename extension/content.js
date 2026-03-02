@@ -13,7 +13,7 @@ let currentVideoState = {
 };
 
 function parseMarkdown(text) {
-  if (!text || text === 'Nicht angefordert') return '';
+  if (!text || text === 'Not requested') return '';
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/^\- (.*$)/gim, '• $1')
@@ -101,7 +101,7 @@ function renderOverlay() {
             <div class="tab-bar">
                 <button class="tab-btn ${active === 'short' ? 'active' : ''}" id="tab-short-btn">
                     <svg viewBox="0 0 24 24" class="tab-icon"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-                    Kurz
+                    Short
                 </button>
                 <button class="tab-btn ${active === 'normal' ? 'active' : ''}" id="tab-normal-btn">
                     <svg viewBox="0 0 24 24" class="tab-icon"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
@@ -109,7 +109,7 @@ function renderOverlay() {
                 </button>
                 <button class="tab-btn ${active === 'transcript' ? 'active' : ''}" id="tab-transcript-btn">
                     <svg viewBox="0 0 24 24" class="tab-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
-                    Transkript
+                    Transcript
                 </button>
             </div>
 
@@ -135,17 +135,17 @@ function renderOverlay() {
                   active !== 'transcript'
                     ? `<button class="action-btn" id="regen-active-btn">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                    Neu generieren
+                    Regenerate
                    </button>`
                     : ''
                 }
                 <button class="action-btn" id="yt-sum-btn-full-reset">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Audio-Reset
+                    Audio Reset
                 </button>
                 <button class="action-btn" id="yt-sum-btn-archive">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
-                    Archiv
+                    Archive
                 </button>
             </div>
         </div>
@@ -167,7 +167,7 @@ function renderOverlay() {
   document.getElementById('yt-sum-btn-archive').onclick = () =>
     chrome.runtime.sendMessage({ action: 'open_dashboard' });
   document.getElementById('yt-sum-btn-full-reset').onclick = () => {
-    if (confirm('Löschen?')) {
+    if (confirm('Delete?')) {
       const videoId = new URL(window.location.href).searchParams.get('v');
       chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
 
@@ -194,13 +194,13 @@ function renderOverlay() {
 function renderTaskContent(task, active) {
   if (task.stage === 'done' || task.stage === 'cached') {
     const text = active === 'transcript' ? currentVideoState.cachedTranscript : task.data;
-    if (!text) return `<p class="idle-msg">Keine Daten vorhanden.</p>`;
+    if (!text) return `<p class="idle-msg">No data available.</p>`;
     return `<div class="result-text">${active === 'transcript' ? text : parseMarkdown(text)}</div>`;
   }
-  if (task.stage === 'idle') return `<p class="idle-msg">Bereit.</p>`;
+  if (task.stage === 'idle') return `<p class="idle-msg">Ready.</p>`;
   if (task.stage === 'error') return `<p class="error-msg">❌ ${task.data || task.message}</p>`;
 
-  const statusMessage = task.message || 'Verarbeite...';
+  const statusMessage = task.message || 'Processing...';
 
   return `
         <div class="status-row" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #606060;">
@@ -293,7 +293,7 @@ function injectHeaderButtons() {
         <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
         </svg>
-        Archiv
+        Archive
     `;
   dashBtn.onclick = () => chrome.runtime.sendMessage({ action: 'open_dashboard' });
   group.appendChild(dashBtn);
@@ -305,7 +305,7 @@ function injectHeaderButtons() {
             <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 6px; fill: currentColor;">
                 <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
             </svg>
-            Kurz
+            Short
         `;
     sBtn.onclick = () => startSummarize(window.location.href, 'short');
 

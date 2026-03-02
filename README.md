@@ -1,15 +1,15 @@
 # YouTube Summarizer (v1.0.0)
 
-Ein intelligentes YouTube-Zusammenfassungs-Tool mit Deep-Integration, Multi-Tasking und Transkript-Caching.
+A smart YouTube summarizer tool with deep integration, multi-tasking, and transcript caching.
 
 ## Features
 
-- **Stateless Backend:** Nutzt "Bring Your Own Key" (BYOK) für Gemini und AssemblyAI.
-- **Turbo-Verarbeitung:** Universal-3 Pro Modell für höchste Präzision.
-- **Smart Caching:** Transkripte werden lokal gespeichert für blitzschnelle Re-Analysen.
-- **Audio Player:** Höre das Original-Audio direkt im Transkript-Tab.
-- **Multi-Tasking:** "Kurz" und "Normal" Zusammenfassungen können gleichzeitig geladen werden.
-- **Deep YouTube Integration:** Buttons direkt in der YouTube-Suche und im Video-Player.
+- **Stateless Backend:** Uses "Bring Your Own Key" (BYOK) for Gemini and AssemblyAI.
+- **Turbo Processing:** Universal-3 Pro model for highest precision.
+- **Smart Caching:** Transcripts are saved locally for lightning-fast re-analysis.
+- **Audio Player:** Listen to the original audio directly in the transcript tab.
+- **Multi-Tasking:** "Short" and "Normal" summaries can be loaded simultaneously.
+- **Deep YouTube Integration:** Buttons directly in the YouTube search and video player.
 
 ## Installation
 
@@ -17,22 +17,22 @@ Ein intelligentes YouTube-Zusammenfassungs-Tool mit Deep-Integration, Multi-Task
 
 1. `cd backend`
 2. `npm install`
-3. Stelle sicher, dass `yt-dlp.exe` und `ffmpeg.exe` im Ordner vorhanden sind (wurden automatisch installiert).
-4. Starte den Server: `node server.js`
+3. Ensure that `yt-dlp.exe` and `ffmpeg.exe` are present in the folder (they are installed automatically).
+4. Start the server: `node server.js`
 
 ### 2. Extension Setup
 
-1. Gehe zu `chrome://extensions/`
-2. Aktiviere den **Entwicklermodus**.
-3. Klicke auf **Entpackte Erweiterung laden** und wähle den Ordner `extension` aus.
-4. Klicke auf das Extension-Icon oben rechts und konfiguriere deine API-Keys.
+1. Go to `chrome://extensions/`
+2. Enable **Developer mode**.
+3. Click on **Load unpacked** and select the `extension` folder.
+4. Click on the extension icon in the top right and configure your API keys.
 
-## Entwicklung
+## Development
 
-Dieses Repo nutzt:
+This repo uses:
 
-- **ESLint** für Code-Qualität.
-- **Prettier** für Formatierung.
-- **Husky & lint-staged** für automatisierte Pre-commit Checks.
+- **ESLint** for code quality.
+- **Prettier** for formatting.
+- **Husky & lint-staged** for automated pre-commit checks.
 
-Vor jedem Commit werden die Dateien automatisch formatiert und auf Fehler geprüft.
+Before each commit, files are automatically formatted and checked for errors.
