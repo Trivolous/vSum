@@ -7,9 +7,9 @@ let currentVideoState = {
   cachedTranscript: null,
   audioUrl: null,
   wordCount: 0,
-  short: { stage: 'idle', percent: 0, data: null },
-  normal: { stage: 'idle', percent: 0, data: null },
-  transcript: { stage: 'idle', percent: 0, data: null },
+  short: { stage: 'idle', percent: 0, data: null, message: '' },
+  normal: { stage: 'idle', percent: 0, data: null, message: '' },
+  transcript: { stage: 'idle', percent: 0, data: null, message: '' },
 };
 
 function parseMarkdown(text) {
@@ -183,10 +183,18 @@ function renderTaskContent(task, active) {
     return `<div class="result-text">${active === 'transcript' ? text : parseMarkdown(text)}</div>`;
   }
   if (task.stage === 'idle') return `<p class="idle-msg">Bereit.</p>`;
-  if (task.stage === 'error') return `<p class="error-msg">❌ ${task.data}</p>`;
+  if (task.stage === 'error') return `<p class="error-msg">❌ ${task.data || task.message}</p>`;
+
+  const statusMessage = task.message || 'Verarbeite...';
+
   return `
-        <div class="status-row"><span>Lädt...</span><span>${task.percent}%</span></div>
-        <div class="progress-container mini"><div class="progress-bar" style="width: ${task.percent}%"></div></div>
+        <div class="status-row" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #606060;">
+            <span style="font-weight: 500;">${statusMessage}</span>
+            <span style="font-weight: 500;">${task.percent || 0}%</span>
+        </div>
+        <div class="progress-container mini" style="height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; overflow: hidden;">
+            <div class="progress-bar" style="width: ${task.percent || 0}%; height: 100%; background: #f00; transition: width 0.3s ease;"></div>
+        </div>
     `;
 }
 
@@ -206,8 +214,13 @@ chrome.runtime.onMessage.addListener((msg) => {
         msg.summaryType === 'normal' ? currentVideoState.normal : currentVideoState.short;
       target.stage = msg.stage;
       target.percent = msg.percent;
+      target.message = msg.message;
+      if (msg.stage === 'error') target.data = msg.message;
+
       currentVideoState.transcript.stage = msg.stage;
       currentVideoState.transcript.percent = msg.percent;
+      currentVideoState.transcript.message = msg.message;
+      if (msg.stage === 'error') currentVideoState.transcript.data = msg.message;
     }
     renderOverlay();
   }
