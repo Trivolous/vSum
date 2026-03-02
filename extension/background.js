@@ -9,10 +9,22 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'delete_summary') {
     deleteSummary(message.videoId);
   }
+  if (message.action === 'delete_audio') {
+    deleteAudioFile(message.videoId);
+  }
   if (message.action === 'delete_partial') {
     deletePartial(message.url, message.type);
   }
 });
+
+async function deleteAudioFile(videoId) {
+  try {
+    const { backend_url = 'http://localhost:5000' } = await chrome.storage.local.get('backend_url');
+    await fetch(`${backend_url}/delete-audio?videoId=${videoId}`);
+  } catch (err) {
+    console.error('Failed to delete audio file:', err);
+  }
+}
 
 async function handleSummarizeStream(msg, tabId) {
   try {
