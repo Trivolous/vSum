@@ -26,8 +26,45 @@ function renderOverlay() {
     panel = document.createElement('div');
     panel.id = 'yt-sum-overlay';
     document.body.appendChild(panel);
+
+    // Close on Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') panel.style.display = 'none';
+    });
+
+    // Close on click outside
+    window.addEventListener('mousedown', (e) => {
+      if (panel.style.display === 'block' && !panel.contains(e.target)) {
+        panel.style.display = 'none';
+      }
+    });
+
+    // Dragging Logic
+    let isDragging = false;
+    let offset = { x: 0, y: 0 };
+
+    panel.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.yt-sum-drag-handle')) {
+        isDragging = true;
+        offset = {
+          x: e.clientX - panel.offsetLeft,
+          y: e.clientY - panel.offsetTop,
+        };
+        panel.style.transition = 'none'; // Disable transition while dragging
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        panel.style.left = `${e.clientX - offset.x}px`;
+        panel.style.top = `${e.clientY - offset.y}px`;
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
     });
   }
   panel.style.display = 'block';
@@ -41,10 +78,11 @@ function renderOverlay() {
         : currentVideoState.transcript;
 
   panel.innerHTML = `
-        <div class="yt-sum-panel-content">
-            <button class="close-btn" id="yt-sum-close-x">×</button>
+        <div class="yt-sum-drag-handle">
             <h3 class="yt-sum-title">${currentVideoState.title}</h3>
-            
+            <button class="close-btn" id="yt-sum-close-x">×</button>
+        </div>
+        <div class="yt-sum-panel-content">
             <div class="tab-bar">
                 <button class="tab-btn ${active === 'short' ? 'active' : ''}" id="tab-short-btn">⚡ Kurz</button>
                 <button class="tab-btn ${active === 'normal' ? 'active' : ''}" id="tab-normal-btn">📄 Normal</button>
@@ -52,17 +90,11 @@ function renderOverlay() {
             </div>
 
             <div id="tab-content" class="task-section ${currentTask.stage}">
-                <div class="task-header">
-                    <strong>${active === 'transcript' ? `📜 Roh-Transkript (${currentVideoState.wordCount} Wörter)` : active === 'short' ? '⚡ Kurz' : '📄 Normal'}</strong>
-                    ${(currentTask.stage === 'done' || currentTask.stage === 'cached') && active !== 'transcript' ? `<button class="regen-small" id="regen-active-btn">🔄 Neu</button>` : ''}
-                </div>
-                
                 ${
                   active === 'transcript' && currentVideoState.audioUrl
                     ? `
-                    <div class="audio-player-container" style="margin-bottom: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px;">
-                        <div style="font-size: 10px; margin-bottom: 5px; color: #666;">Audio-Quelle: Local Host</div>
-                        <audio controls style="width: 100%;"><source src="${currentVideoState.audioUrl}" type="audio/mpeg"></audio>
+                    <div class="audio-player-container" style="margin-bottom: 12px;">
+                        <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}" type="audio/mpeg"></audio>
                     </div>
                 `
                     : ''
@@ -74,6 +106,7 @@ function renderOverlay() {
             </div>
 
             <div class="sum-footer">
+                ${(currentTask.stage === 'done' || currentTask.stage === 'cached') && active !== 'transcript' ? `<button class="action-btn" id="regen-active-btn">🔄 Neu generieren</button>` : ''}
                 <button class="action-btn" id="yt-sum-btn-full-reset">🔥 Audio-Reset</button>
                 <button class="action-btn" id="yt-sum-btn-archive">Archiv</button>
             </div>

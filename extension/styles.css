@@ -1,122 +1,199 @@
 /* Multi-Tasking Tabbed Overlay */
 #yt-sum-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 100px; /* Start at a fixed position to allow dragging */
+  right: 20px;
   width: 550px;
+  min-width: 300px;
+  min-height: 200px;
   background: white;
   z-index: 10000;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
-  border-radius: 14px;
-  padding: 25px;
-  font-family: 'Roboto', sans-serif;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 0; /* Changed to 0 to handle internal spacing with drag area */
+  font-family: 'Roboto', 'Arial', sans-serif;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
+  resize: both;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html[dark] #yt-sum-overlay {
+  background: #212121;
+  color: #f1f1f1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+}
+
+.yt-sum-drag-handle {
+  height: 40px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  cursor: move;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .yt-sum-drag-handle {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .yt-sum-panel-content {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.yt-sum-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab-bar {
   display: flex;
-  border-bottom: 2px solid #eee;
-  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+html[dark] .tab-bar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 10px;
+  padding: 12px 8px;
   background: none;
   border: none;
   cursor: pointer;
-  font-weight: bold;
-  color: #666;
+  font-weight: 500;
+  color: #606060;
+  font-size: 14px;
   transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+html[dark] .tab-btn {
+  color: #aaa;
+}
+
+.tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tab-btn.active {
-  color: #d32f2f;
-  border-bottom: 3px solid #d32f2f;
+  color: #f00;
+  border-bottom: 2px solid #f00;
+}
+
+html[dark] .tab-btn.active {
+  color: #ff4e4e;
+  border-bottom: 2px solid #ff4e4e;
 }
 
 .task-section {
   background: #f9f9f9;
   border-radius: 8px;
-  padding: 15px;
+  padding: 16px;
   flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .task-section {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .content-scrollbox {
   overflow-y: auto;
-  max-height: 400px;
-  padding-right: 10px;
-}
-
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  flex: 1;
+  padding-right: 8px;
 }
 
 .result-text {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #333;
-  white-space: pre-line;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f0f0f;
+}
+
+html[dark] .result-text {
+  color: #f1f1f1;
 }
 
 .sum-footer {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
 }
 
-/* Custom Scrollbar */
-.content-scrollbox::-webkit-scrollbar {
-  width: 6px;
-}
-.content-scrollbox::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-.content-scrollbox::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-.content-scrollbox::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+.action-btn {
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-/* Restliche Styles beibehalten... */
-.progress-container.mini {
-  height: 8px;
-  background: #eee;
-  border-radius: 4px;
-  margin-top: 10px;
+html[dark] .action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f1f1;
 }
-.progress-container.mini .progress-bar {
-  height: 100%;
-  background: #d32f2f;
-  transition: width 0.3s;
+
+.action-btn:hover {
+  background: #f2f2f2;
 }
+
+html[dark] .action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   border: none;
   background: none;
-  color: #999;
+  color: #606060;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+html[dark] .close-btn {
+  color: #aaa;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 .yt-sum-btn {
   display: flex;
