@@ -4,8 +4,8 @@
   top: 100px;
   right: 20px;
   width: 550px;
-  min-width: 350px;
-  min-height: 280px; /* Minimum height to fit header + tabs + footer + small content */
+  min-width: 420px; /* Increased to prevent button wrapping issues */
+  min-height: 350px; /* Increased to ensure header + tabs + footer + readable content */
   background: white;
   z-index: 10000;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
@@ -16,8 +16,253 @@
   display: flex;
   flex-direction: column;
   resize: both;
-  overflow: hidden; /* Required for 'resize' to work */
+  overflow: hidden; /* Required for 'resize' handle to show and work */
   border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+html[dark] #yt-sum-overlay {
+  background: #212121;
+  color: #f1f1f1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+}
+
+.yt-sum-drag-handle {
+  flex: 0 0 48px; /* Fixed height, never shrinks */
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  cursor: move;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+html[dark] .yt-sum-drag-handle {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.yt-sum-panel-content {
+  flex: 1 1 0%; /* Take remaining space and allow shrinking to 0 */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Critical for nested flex scrolling */
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.yt-sum-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-bar {
+  flex: 0 0 auto; /* Height based on content, never shrinks */
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+html[dark] .tab-bar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: #606060;
+  font-size: 14px;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+html[dark] .tab-btn {
+  color: #aaa;
+}
+
+.tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html[dark] .tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #f00;
+  border-bottom: 2px solid #f00;
+}
+
+html[dark] .tab-btn.active {
+  color: #ff4e4e;
+  border-bottom: 2px solid #ff4e4e;
+}
+
+.task-section {
+  flex: 1 1 0%; /* Take remaining space and allow shrinking to 0 */
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 0; /* Critical for enabling scrolling in children */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+html[dark] .task-section {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.audio-player-container {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+}
+
+.content-scrollbox {
+  flex: 1 1 0%;
+  overflow-y: auto !important;
+  min-height: 0;
+  padding-right: 8px;
+}
+
+.result-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f0f0f;
+  padding-bottom: 8px;
+}
+
+html[dark] .result-text {
+  color: #f1f1f1;
+}
+
+.sum-footer {
+  flex: 0 0 auto; /* Footer height is fixed to its content, never shrinks */
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping if width is extremely small */
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+  box-sizing: border-box;
+}
+
+.action-btn {
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+html[dark] .action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f1f1;
+}
+
+.action-btn:hover {
+  background: #f2f2f2;
+}
+
+html[dark] .action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.close-btn {
+  font-size: 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #606060;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+html[dark] .close-btn {
+  color: #aaa;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Custom Scrollbar for Chrome */
+.content-scrollbox::-webkit-scrollbar {
+  width: 8px;
+}
+.content-scrollbox::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+.content-scrollbox::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+html[dark] .content-scrollbox::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+html[dark] .content-scrollbox::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.yt-sum-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0f0f0f;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+html[dark] .yt-sum-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f1f1f1;
+}
+
+.yt-sum-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .yt-sum-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Popup Styles */
@@ -128,226 +373,4 @@ html[dark] .input-wrapper select {
 html[dark] .secondary-btn {
   background-color: rgba(255, 255, 255, 0.1);
   color: #f1f1f1;
-}
-
-html[dark] #yt-sum-overlay {
-  background: #212121;
-  color: #f1f1f1;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
-}
-
-.yt-sum-drag-handle {
-  flex-shrink: 0; /* Header stays visible */
-  height: 40px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  cursor: move;
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-html[dark] .yt-sum-drag-handle {
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.yt-sum-panel-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0; /* Allow the panel to shrink */
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.yt-sum-title {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tab-bar {
-  display: flex;
-  flex-shrink: 0; /* Tabs stay visible */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
-}
-
-html[dark] .tab-bar {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 12px 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  color: #606060;
-  font-size: 14px;
-  transition: all 0.2s;
-  border-bottom: 2px solid transparent;
-}
-
-html[dark] .tab-btn {
-  color: #aaa;
-}
-
-.tab-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-html[dark] .tab-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.tab-btn.active {
-  color: #f00;
-  border-bottom: 2px solid #f00;
-}
-
-html[dark] .tab-btn.active {
-  color: #ff4e4e;
-  border-bottom: 2px solid #ff4e4e;
-}
-
-.task-section {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 16px;
-  flex: 1;
-  min-height: 0; /* Critical for enabling scrolling in children */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-html[dark] .task-section {
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.content-scrollbox {
-  overflow-y: auto !important; /* Ensure scrollbar appears */
-  flex: 1;
-  min-height: 0; /* Key for enabling scrolling in flex children */
-  padding-right: 8px;
-}
-
-.result-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #0f0f0f;
-}
-
-html[dark] .result-text {
-  color: #f1f1f1;
-}
-
-.sum-footer {
-  display: flex;
-  flex-shrink: 0; /* Footer stays visible */
-  gap: 8px;
-  margin-top: 16px;
-  justify-content: flex-end;
-}
-
-.action-btn {
-  padding: 0 16px;
-  height: 36px;
-  border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: white;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-html[dark] .action-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #f1f1f1;
-}
-
-.action-btn:hover {
-  background: #f2f2f2;
-}
-
-html[dark] .action-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.close-btn {
-  font-size: 20px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: #606060;
-  padding: 4px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-}
-
-html[dark] .close-btn {
-  color: #aaa;
-}
-
-.close-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-html[dark] .close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-.yt-sum-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 18px;
-  border: none;
-  cursor: pointer;
-  font-family: 'Roboto', 'Arial', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #0f0f0f;
-  margin-right: 8px;
-  white-space: nowrap;
-}
-
-/* Dark Mode Detect via YouTube attribute */
-html[dark] .yt-sum-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #f1f1f1;
-}
-
-.yt-sum-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-html[dark] .yt-sum-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.yt-sum-btn.short {
-  /* Subtle indicator if needed, but keeping it clean for now */
-}
-.yt-sum-btn.norm {
-}
-.yt-sum-btn.dash {
 }
