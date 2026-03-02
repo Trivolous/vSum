@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'delete_summary') {
     deleteSummary(message.videoId);
   }
-  if (message.action === 'delete_audio_file') {
+  if (message.action === 'delete_audio') {
     deleteAudioFile(message.videoId);
   }
   if (message.action === 'delete_partial') {
@@ -22,7 +22,7 @@ async function deleteAudioFile(videoId) {
     const { backend_url = 'http://localhost:5000' } = await chrome.storage.local.get('backend_url');
     await fetch(`${backend_url}/delete-audio?videoId=${videoId}`);
   } catch (err) {
-    console.error('Failed to delete audio file from backend:', err);
+    console.error('Failed to delete audio file:', err);
   }
 }
 

@@ -25,21 +25,21 @@ app.use(
 
 app.get('/delete-audio', (req, res) => {
   const { videoId } = req.query;
-  if (!videoId) return res.status(400).json({ success: false, error: 'No videoId provided' });
+  if (!videoId) return res.status(400).json({ error: 'Missing videoId' });
 
   try {
     const files = fs.readdirSync(audioStore);
-    const toDelete = files.filter((f) => f.startsWith(`audio_${videoId}.`));
+    const filesToDelete = files.filter((f) => f.startsWith(`audio_${videoId}.`));
 
-    toDelete.forEach((f) => {
+    filesToDelete.forEach((f) => {
       fs.unlinkSync(path.join(audioStore, f));
-      console.log(`Deleted cached audio: ${f}`);
     });
 
-    res.json({ success: true, deletedCount: toDelete.length });
-  } catch (err) {
-    console.error(`Error deleting audio for ${videoId}:`, err);
-    res.status(500).json({ success: false, error: err.message });
+    console.log(`Deleted ${filesToDelete.length} audio files for video: ${videoId}`);
+    res.json({ success: true, deletedCount: filesToDelete.length });
+  } catch (error) {
+    console.error('Error deleting audio:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

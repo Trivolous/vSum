@@ -118,11 +118,7 @@ function renderOverlay() {
                   active === 'transcript' && currentVideoState.audioUrl
                     ? `
                     <div class="audio-player-container">
-                        <audio controls 
-                               src="${currentVideoState.audioUrl}" 
-                               style="width: 100%; height: 32px;"
-                               onerror="this.insertAdjacentHTML('afterend', '<p style=\'color:red;font-size:10px;margin-top:4px;\'>Audio load failed. Try resetting audio.</p>')">
-                        </audio>
+                        <audio controls style="width: 100%; height: 32px;"><source src="${currentVideoState.audioUrl}"></audio>
                     </div>
                 `
                     : ''
@@ -143,13 +139,13 @@ function renderOverlay() {
                    </button>`
                     : ''
                 }
-                <button class="action-btn" id="yt-sum-btn-full-reset">
-                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Reset Summary
+                <button class="action-btn" id="yt-sum-btn-purge-file" title="Delete backend audio file">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6l-1 1H2v2h12V5z"/></svg>
+                    Purge File
                 </button>
-                <button class="action-btn" id="yt-sum-btn-delete-audio">
-                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>
-                    Delete Audio File
+                <button class="action-btn" id="yt-sum-btn-full-reset" title="Clear local cache">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Reset Data
                 </button>
                 <button class="action-btn" id="yt-sum-btn-archive">
                     <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; margin-right: 6px; fill: currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
@@ -175,41 +171,40 @@ function renderOverlay() {
   document.getElementById('yt-sum-btn-archive').onclick = () =>
     chrome.runtime.sendMessage({ action: 'open_dashboard' });
 
+  document.getElementById('yt-sum-btn-purge-file').onclick = () => {
+    if (confirm('Delete backend audio file? This forces a redownload on next analysis.')) {
+      const videoId = new URL(window.location.href).searchParams.get('v');
+      chrome.runtime.sendMessage({ action: 'delete_audio', videoId: videoId });
+
+      // Update local state to reflect audio is gone (optional but good UI)
+      currentVideoState.audioUrl = null;
+      renderOverlay();
+    }
+  };
+
   document.getElementById('yt-sum-btn-full-reset').onclick = () => {
-    if (confirm('Delete saved summary?')) {
+    if (confirm('Delete?')) {
       const videoId = new URL(window.location.href).searchParams.get('v');
       chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
-      resetLocalState(videoId);
+
+      // Reset local state
+      currentVideoState = {
+        videoId: videoId,
+        activeTab: currentVideoState.activeTab,
+        title: currentVideoState.title,
+        cachedTranscript: null,
+        audioUrl: null,
+        wordCount: 0,
+        short: { stage: 'idle', percent: 0, data: null, message: '' },
+        normal: { stage: 'idle', percent: 0, data: null, message: '' },
+        transcript: { stage: 'idle', percent: 0, data: null, message: '' },
+      };
+
       panel.style.display = 'none';
     }
   };
-
-  document.getElementById('yt-sum-btn-delete-audio').onclick = () => {
-    if (confirm('Delete summary AND cached audio file? This forces a re-download.')) {
-      const videoId = new URL(window.location.href).searchParams.get('v');
-      chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
-      chrome.runtime.sendMessage({ action: 'delete_audio_file', videoId: videoId });
-      resetLocalState(videoId);
-      panel.style.display = 'none';
-    }
-  };
-
   if (document.getElementById('regen-active-btn'))
     document.getElementById('regen-active-btn').onclick = () => triggerNewAnalysis(active);
-}
-
-function resetLocalState(videoId) {
-  currentVideoState = {
-    videoId: videoId,
-    activeTab: currentVideoState.activeTab,
-    title: currentVideoState.title,
-    cachedTranscript: null,
-    audioUrl: null,
-    wordCount: 0,
-    short: { stage: 'idle', percent: 0, data: null, message: '' },
-    normal: { stage: 'idle', percent: 0, data: null, message: '' },
-    transcript: { stage: 'idle', percent: 0, data: null, message: '' },
-  };
 }
 
 function renderTaskContent(task, active) {
