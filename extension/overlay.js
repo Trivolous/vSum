@@ -180,7 +180,7 @@ function renderOverlay() {
     }
   };
   if (document.getElementById('regen-active-btn'))
-    document.getElementById('regen-active-btn').onclick = () => triggerNewAnalysis(active);
+    document.getElementById('regen-active-btn').onclick = () => window.triggerNewAnalysis(active);
 }
 
 function renderTaskContent(task, active) {
