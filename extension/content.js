@@ -106,6 +106,22 @@ function injectHeaderButtons() {
   window.attachGlobalListeners();
 }
 
+// Prevent UI freezing by limiting refresh rate during heavy streaming
+function throttle(func, limit) {
+  let inThrottle;
+  return function () {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
+const throttledRender = throttle(() => window.renderOverlay(), 100);
+
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === 'status_update') {
     const state = window.currentVideoState;
@@ -120,6 +136,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       state.cachedTranscript = msg.message.transcript;
       state.audioUrl = msg.message.audioUrl;
       state.wordCount = msg.message.wordCount || 0;
+      window.renderOverlay(); // Final update is immediate
     } else {
       const target =
         msg.summaryType === 'normal'
@@ -136,8 +153,9 @@ chrome.runtime.onMessage.addListener((msg) => {
       state.transcript.percent = msg.percent;
       state.transcript.message = msg.message;
       if (msg.stage === 'error') state.transcript.data = msg.message;
+
+      throttledRender(); // Throttled update
     }
-    window.renderOverlay();
   }
 });
 
