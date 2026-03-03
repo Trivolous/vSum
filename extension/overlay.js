@@ -34,6 +34,9 @@ function attachGlobalListeners() {
 
 function renderOverlay() {
   attachGlobalListeners();
+  const state = window.currentVideoState;
+  console.log('[vSum] Rendering overlay. Active tab:', state.activeTab);
+
   let panel = document.getElementById('yt-sum-overlay');
   if (!panel) {
     panel = document.createElement('div');
@@ -146,35 +149,45 @@ function renderOverlay() {
         </div>
     `;
 
-  document.getElementById('yt-sum-close-x').onclick = () => (panel.style.display = 'none');
-  document.getElementById('tab-short-btn').onclick = () => {
-    state.activeTab = 'short';
-    renderOverlay();
-  };
-  document.getElementById('tab-normal-btn').onclick = () => {
-    state.activeTab = 'normal';
-    renderOverlay();
-  };
-  document.getElementById('tab-detailed-btn').onclick = () => {
-    state.activeTab = 'detailed';
-    renderOverlay();
-  };
-  document.getElementById('tab-transcript-btn').onclick = () => {
-    state.activeTab = 'transcript';
-    renderOverlay();
+  // Attach listeners with defensive checks
+  const safeSetClick = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = fn;
   };
 
-  document.getElementById('yt-sum-btn-purge-file').onclick = () => {
+  safeSetClick('yt-sum-close-x', () => (panel.style.display = 'none'));
+  safeSetClick('tab-short-btn', () => {
+    console.log('[vSum] Tab clicked: short');
+    state.activeTab = 'short';
+    renderOverlay();
+  });
+  safeSetClick('tab-normal-btn', () => {
+    console.log('[vSum] Tab clicked: normal');
+    state.activeTab = 'normal';
+    renderOverlay();
+  });
+  safeSetClick('tab-detailed-btn', () => {
+    console.log('[vSum] Tab clicked: detailed');
+    state.activeTab = 'detailed';
+    renderOverlay();
+  });
+  safeSetClick('tab-transcript-btn', () => {
+    console.log('[vSum] Tab clicked: transcript');
+    state.activeTab = 'transcript';
+    renderOverlay();
+  });
+
+  safeSetClick('yt-sum-btn-purge-file', () => {
     if (confirm('Delete backend audio file? This forces a redownload on next analysis.')) {
       const videoId = new URL(window.location.href).searchParams.get('v');
       chrome.runtime.sendMessage({ action: 'delete_audio', videoId: videoId });
       state.audioUrl = null;
       renderOverlay();
     }
-  };
+  });
 
-  document.getElementById('yt-sum-btn-full-reset').onclick = () => {
-    if (confirm('Delete?')) {
+  safeSetClick('yt-sum-btn-full-reset', () => {
+    if (confirm('Delete all cached data for this video?')) {
       const videoId = new URL(window.location.href).searchParams.get('v');
       chrome.runtime.sendMessage({ action: 'delete_summary', videoId: videoId });
 
@@ -187,17 +200,22 @@ function renderOverlay() {
         wordCount: 0,
         short: { stage: 'idle', percent: 0, data: null, message: '' },
         normal: { stage: 'idle', percent: 0, data: null, message: '' },
+        detailed: { stage: 'idle', percent: 0, data: null, message: '' },
         transcript: { stage: 'idle', percent: 0, data: null, message: '' },
       };
 
       panel.style.display = 'none';
     }
-  };
-  if (document.getElementById('regen-active-btn'))
+  });
+
+  if (document.getElementById('regen-active-btn')) {
     document.getElementById('regen-active-btn').onclick = () => window.triggerNewAnalysis(active);
+  }
 }
 
 function renderTaskContent(task, active) {
+  if (!task) return `<p class="idle-msg">Ready.</p>`;
+
   if (task.stage === 'done' || task.stage === 'cached') {
     const text = active === 'transcript' ? window.currentVideoState.cachedTranscript : task.data;
     if (!text) return `<p class="idle-msg">No data available.</p>`;
