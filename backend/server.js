@@ -124,6 +124,14 @@ app.get('/process-video', async (req, res) => {
 
       if (transcript.status === 'error') throw new Error(transcript.error);
       transcriptText = transcript.text;
+
+      // Send intermediate update so frontend can cache the transcript immediately
+      sendStatus('summarizing', 0, {
+        transcript: transcriptText,
+        audioUrl: `http://localhost:5000/audio/${audioFilename}`,
+        wordCount: transcriptText.split(/\s+/).length,
+        isPartial: true,
+      });
     }
 
     // 3. Summarization

@@ -204,7 +204,7 @@ function renderOverlay() {
         transcript: { stage: 'idle', percent: 0, data: null, message: '' },
       };
 
-      panel.style.display = 'none';
+      renderOverlay(); // Refresh UI instead of hiding
     }
   });
 

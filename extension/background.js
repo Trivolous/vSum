@@ -68,9 +68,14 @@ async function handleSummarizeStream(msg, tabId) {
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = JSON.parse(line.substring(6));
-          if (data.stage === 'done') {
+
+          // Handle partial transcript update immediately
+          if (data.message && data.message.isPartial) {
+            await savePartialTranscriptToArchive(msg, data.message);
+          } else if (data.stage === 'done') {
             await saveToArchiveWithHistory(msg, data.message);
           }
+
           chrome.tabs.sendMessage(tabId, {
             action: 'status_update',
             summaryType: msg.summaryType,
@@ -87,6 +92,34 @@ async function handleSummarizeStream(msg, tabId) {
       message: err.message,
     });
   }
+}
+
+async function savePartialTranscriptToArchive(msg, partialData) {
+  const { yt_summaries = [] } = await chrome.storage.local.get('yt_summaries');
+  const existingIndex = yt_summaries.findIndex((s) => s.url === msg.url);
+
+  if (existingIndex >= 0) {
+    const entry = yt_summaries[existingIndex];
+    entry.transcript = partialData.transcript;
+    entry.audioUrl = partialData.audioUrl;
+    yt_summaries[existingIndex] = entry;
+  } else {
+    yt_summaries.unshift({
+      id: Date.now(),
+      title: msg.title,
+      url: msg.url,
+      thumbnail: msg.thumbnail,
+      transcript: partialData.transcript,
+      audioUrl: partialData.audioUrl,
+      timestamp: new Date().toISOString(),
+      model: msg.model,
+      short_summary: null,
+      normal_summary: null,
+      detailed_summary: null,
+      history: [],
+    });
+  }
+  await chrome.storage.local.set({ yt_summaries });
 }
 
 async function saveToArchiveWithHistory(msg, resultData) {
