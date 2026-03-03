@@ -42,10 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     await chrome.storage.local.set(data);
     const btn = document.getElementById('save');
-    btn.innerText = 'Gespeichert!';
+    btn.innerText = 'Saved!';
     btn.style.backgroundColor = '#2ba640';
     setTimeout(() => {
-      btn.innerText = 'Speichern';
+      btn.innerText = 'Save';
       btn.style.backgroundColor = '#cc0000';
     }, 2000);
   });

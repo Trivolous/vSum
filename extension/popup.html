@@ -8,7 +8,7 @@
   <body class="popup-body">
     <div class="popup-header">
       <h2 style="color: #f00">vSum</h2>
-      <h2>Einstellungen</h2>
+      <h2>Settings</h2>
     </div>
 
     <div class="config-group">
@@ -28,32 +28,32 @@
       </div>
 
       <div class="input-wrapper">
-        <label for="gemini_model">Gemini Modell</label>
+        <label for="gemini_model">Gemini Model</label>
         <select id="gemini_model">
           <option value="gemini-3.1-pro">Gemini 3.1 Pro (Flagship)</option>
           <option value="gemini-3-flash">Gemini 3 Flash (Fast)</option>
           <option value="gemini-3-deep-think">Gemini 3 Deep Think</option>
-          <option value="custom">Custom Modell...</option>
+          <option value="custom">Custom Model...</option>
         </select>
       </div>
 
       <div id="custom_model_wrapper" class="input-wrapper" style="display: none">
-        <label for="custom_model_name">Modell-Name</label>
-        <input type="text" id="custom_model_name" placeholder="z.B. gemini-3.1-pro-preview" />
+        <label for="custom_model_name">Model Name</label>
+        <input type="text" id="custom_model_name" placeholder="e.g. gemini-3.1-pro-preview" />
       </div>
 
       <div class="input-wrapper">
-        <label for="aai_model">Transkription Modell</label>
+        <label for="aai_model">Transcription Model</label>
         <select id="aai_model">
-          <option value="universal-3-pro">Universal-3 Pro (DE, EN, FR, ES, IT, PT)</option>
-          <option value="universal-2">Universal-2 (99+ Sprachen / Türkisch)</option>
+          <option value="universal-3-pro">Universal-3 Pro (EN, ES, FR, DE, IT, PT)</option>
+          <option value="universal-2">Universal-2 (99+ Languages)</option>
         </select>
       </div>
     </div>
 
     <div class="popup-footer">
-      <button id="save" class="save-btn">Speichern</button>
-      <button id="open_dashboard" class="secondary-btn">Archiv</button>
+      <button id="save" class="save-btn">Save</button>
+      <button id="open_dashboard" class="secondary-btn">Archive</button>
     </div>
 
     <script src="popup.js"></script>

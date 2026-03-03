@@ -19,6 +19,7 @@ export default [
       'no-unused-vars': 'warn',
       'no-console': 'off',
       'no-useless-escape': 'off',
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
       'max-len': [
         'warn',
         {

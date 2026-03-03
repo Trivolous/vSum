@@ -9,10 +9,22 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'delete_summary') {
     deleteSummary(message.videoId);
   }
+  if (message.action === 'delete_audio') {
+    deleteAudioFile(message.videoId);
+  }
   if (message.action === 'delete_partial') {
     deletePartial(message.url, message.type);
   }
 });
+
+async function deleteAudioFile(videoId) {
+  try {
+    const { backend_url = 'http://localhost:5000' } = await chrome.storage.local.get('backend_url');
+    await fetch(`${backend_url}/delete-audio?videoId=${videoId}`);
+  } catch (err) {
+    console.error('Failed to delete audio file:', err);
+  }
+}
 
 async function handleSummarizeStream(msg, tabId) {
   try {
@@ -56,9 +68,14 @@ async function handleSummarizeStream(msg, tabId) {
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = JSON.parse(line.substring(6));
-          if (data.stage === 'done') {
+
+          // Handle partial transcript update immediately
+          if (data.message && data.message.isPartial) {
+            await savePartialTranscriptToArchive(msg, data.message);
+          } else if (data.stage === 'done') {
             await saveToArchiveWithHistory(msg, data.message);
           }
+
           chrome.tabs.sendMessage(tabId, {
             action: 'status_update',
             summaryType: msg.summaryType,
@@ -77,6 +94,34 @@ async function handleSummarizeStream(msg, tabId) {
   }
 }
 
+async function savePartialTranscriptToArchive(msg, partialData) {
+  const { yt_summaries = [] } = await chrome.storage.local.get('yt_summaries');
+  const existingIndex = yt_summaries.findIndex((s) => s.url === msg.url);
+
+  if (existingIndex >= 0) {
+    const entry = yt_summaries[existingIndex];
+    entry.transcript = partialData.transcript;
+    entry.audioUrl = partialData.audioUrl;
+    yt_summaries[existingIndex] = entry;
+  } else {
+    yt_summaries.unshift({
+      id: Date.now(),
+      title: msg.title,
+      url: msg.url,
+      thumbnail: msg.thumbnail,
+      transcript: partialData.transcript,
+      audioUrl: partialData.audioUrl,
+      timestamp: new Date().toISOString(),
+      model: msg.model,
+      short_summary: null,
+      normal_summary: null,
+      detailed_summary: null,
+      history: [],
+    });
+  }
+  await chrome.storage.local.set({ yt_summaries });
+}
+
 async function saveToArchiveWithHistory(msg, resultData) {
   const storageKey = 'yt_summaries';
   const { yt_summaries = [] } = await chrome.storage.local.get(storageKey);
@@ -91,17 +136,16 @@ async function saveToArchiveWithHistory(msg, resultData) {
       timestamp: entry.timestamp || new Date().toISOString(),
       short_summary: entry.short_summary,
       normal_summary: entry.normal_summary,
+      detailed_summary: entry.detailed_summary,
       model: entry.model || 'unknown',
     });
 
     if (entry.history.length > 5) entry.history.pop();
 
-    if (msg.summaryType === 'short') entry.short_summary = resultData.short_summary;
-    if (msg.summaryType === 'normal') entry.normal_summary = resultData.normal_summary;
-    if (msg.summaryType === 'both') {
-      entry.short_summary = resultData.short_summary;
-      entry.normal_summary = resultData.normal_summary;
-    }
+    // Always update all summaries if present in the backend response
+    if (resultData.short_summary) entry.short_summary = resultData.short_summary;
+    if (resultData.normal_summary) entry.normal_summary = resultData.normal_summary;
+    if (resultData.detailed_summary) entry.detailed_summary = resultData.detailed_summary;
 
     entry.transcript = resultData.transcript;
     entry.timestamp = new Date().toISOString();
@@ -117,6 +161,7 @@ async function saveToArchiveWithHistory(msg, resultData) {
       transcript: resultData.transcript,
       short_summary: resultData.short_summary,
       normal_summary: resultData.normal_summary,
+      detailed_summary: resultData.detailed_summary,
       timestamp: new Date().toISOString(),
       model: msg.model,
       history: [],
@@ -139,6 +184,7 @@ async function deletePartial(url, type) {
   if (index >= 0) {
     if (type === 'short') yt_summaries[index].short_summary = null;
     if (type === 'normal') yt_summaries[index].normal_summary = null;
+    if (type === 'detailed') yt_summaries[index].detailed_summary = null;
     await chrome.storage.local.set({ yt_summaries });
   }
 }

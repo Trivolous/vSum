@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Summarizer (Deep Integration)",
   "version": "1.0.0",
-  "description": "Zusammenfassungen direkt im YouTube UI mit Modell-Wahl.",
+  "description": "Summaries directly in the YouTube UI with model selection.",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["https://www.youtube.com/*"],
   "action": {
@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"],
+      "js": ["utils.js", "state.js", "overlay.js", "content.js"],
       "css": ["styles.css"]
     }
   ],

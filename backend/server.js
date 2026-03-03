@@ -23,6 +23,26 @@ app.use(
   express.static(audioStore)
 );
 
+app.get('/delete-audio', (req, res) => {
+  const { videoId } = req.query;
+  if (!videoId) return res.status(400).json({ error: 'Missing videoId' });
+
+  try {
+    const files = fs.readdirSync(audioStore);
+    const filesToDelete = files.filter((f) => f.startsWith(`audio_${videoId}.`));
+
+    filesToDelete.forEach((f) => {
+      fs.unlinkSync(path.join(audioStore, f));
+    });
+
+    console.log(`Deleted ${filesToDelete.length} audio files for video: ${videoId}`);
+    res.json({ success: true, deletedCount: filesToDelete.length });
+  } catch (error) {
+    console.error('Error deleting audio:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/process-video', async (req, res) => {
   const { url, summaryType, modelName, gemini_key, aai_key, existingTranscript } = req.query;
 
@@ -37,46 +57,64 @@ app.get('/process-video', async (req, res) => {
 
   try {
     const videoId = new URL(url).searchParams.get('v');
-    const audioFilename = `audio_${videoId}.mp3`;
-    const audioPath = path.join(audioStore, audioFilename);
+
+    // Helper to find a valid, finished audio file in cache
+    const findAudioFile = (vId) => {
+      const validExtensions = ['.m4a', '.webm', '.mp3', '.wav', '.ogg'];
+      const files = fs.readdirSync(audioStore);
+      return files.find((f) => {
+        const ext = path.extname(f).toLowerCase();
+        return f.startsWith(`audio_${vId}.`) && validExtensions.includes(ext);
+      });
+    };
+
+    let audioFilename = findAudioFile(videoId);
+    let audioPath = audioFilename ? path.join(audioStore, audioFilename) : null;
 
     let transcriptText = existingTranscript;
 
     if (!transcriptText) {
-      sendStatus('downloading', 10, 'Video-Download (HQ Audio)...');
+      sendStatus('downloading', 10, 'Video Download (HQ Audio)...');
       const ytDlpPath = fs.existsSync(path.join(__dirname, 'yt-dlp.exe'))
         ? path.join(__dirname, 'yt-dlp.exe')
         : 'yt-dlp';
 
-      if (!fs.existsSync(audioPath)) {
+      if (!audioPath) {
+        // Force m4a (native AAC) for best compatibility, fallback to best audio
+        const outputTemplate = path.join(audioStore, `audio_${videoId}.%(ext)s`);
         const ytDlp = spawn(ytDlpPath, [
           '-f',
-          'ba',
-          '-x',
-          '--audio-format',
-          'mp3',
-          '--ffmpeg-location',
-          __dirname,
+          'ba[ext=m4a]/ba',
+          '--no-playlist',
           '-o',
-          audioPath,
+          outputTemplate,
           url,
         ]);
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
           ytDlp.stdout.on('data', (d) => {
             const m = d.toString().match(/(\d+\.\d+)%/);
             if (m) sendStatus('downloading', parseFloat(m[1]), `Download: ${m[1]}%`);
           });
-          ytDlp.on('close', resolve);
+          ytDlp.on('close', (code) => {
+            if (code !== 0) reject(new Error(`yt-dlp exited with code ${code}`));
+            else resolve();
+          });
         });
+
+        // Re-check for the finished file
+        audioFilename = findAudioFile(videoId);
+        if (!audioFilename)
+          throw new Error('Download failed: file not found or unsupported format');
+        audioPath = path.join(audioStore, audioFilename);
       }
 
-      // 2. Transkription mit Fallback-Support
-      sendStatus('uploading', 0, 'AssemblyAI Analyse...');
+      // 2. Transcription with Fallback Support
+      sendStatus('uploading', 0, 'AssemblyAI Analysis...');
       const client = new AssemblyAI({ apiKey: aai_key });
 
       const transcript = await client.transcripts.transcribe({
         audio: audioPath,
-        // Nutze universal-3-pro als primär, universal-2 als Fallback für 99+ Sprachen (z.B. Türkisch)
+        // Use universal-3-pro as primary, universal-2 as fallback for 99+ languages
         speech_models: ['universal-3-pro', 'universal-2'],
         language_detection: true,
         punctuate: true,
@@ -86,28 +124,41 @@ app.get('/process-video', async (req, res) => {
 
       if (transcript.status === 'error') throw new Error(transcript.error);
       transcriptText = transcript.text;
+
+      // Send intermediate update so frontend can cache the transcript immediately
+      sendStatus('summarizing', 0, {
+        transcript: transcriptText,
+        audioUrl: `http://localhost:5000/audio/${audioFilename}`,
+        wordCount: transcriptText.split(/\s+/).length,
+        isPartial: true,
+      });
     }
 
-    // 3. Zusammenfassung
-    sendStatus('summarizing', 0, 'Gemini erstellt Zusammenfassung...');
+    // 3. Summarization
+    sendStatus('summarizing', 0, 'Gemini is generating summary...');
     const genAI = new GoogleGenerativeAI(gemini_key);
     const model = genAI.getGenerativeModel({ model: modelName || 'gemini-3.1-pro' });
 
-    let prompt = `TRANSKRIPT: "${transcriptText}"\n\nFasse das auf DEUTSCH zusammen.\n`;
-    prompt += summaryType === 'short' ? 'Kurz.' : 'Ausführlich.';
-    prompt += `\n\nAntworte NUR als JSON: {"short_summary": "...", "normal_summary": "..."}`;
+    let prompt = `TRANSCRIPT: "${transcriptText}"\n\nSummarize this in ENGLISH.\n\n`;
+    prompt += `Provide THREE distinct summaries in your response:
+1. short_summary: A very concise 1-2 sentence summary.
+2. normal_summary: A medium-length summary using bullet points for key information.
+3. detailed_summary: A very long, exhaustive and detailed summary. Use nested bullet points and sections to organize the information. Cover every single point discussed in the video.
+
+Answer ONLY as a valid JSON object with these three keys: "short_summary", "normal_summary", "detailed_summary".`;
 
     const result = await model.generateContent(prompt);
     const geminiRaw = result.response.text();
     const jsonMatch = geminiRaw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('KI antwortete nicht im JSON Format.');
+    if (!jsonMatch) throw new Error('AI did not respond in JSON format.');
     const summaryData = JSON.parse(jsonMatch[0]);
 
-    // WICHTIG: Wir bauen das Objekt EXPLIZIT zusammen
+    // IMPORTANT: We build the object EXPLICITLY
     const finalResult = {
-      transcript: transcriptText, // Das hier ist das ROHE AAI Transkript
-      short_summary: summaryData.short_summary || 'Fehler',
-      normal_summary: summaryData.normal_summary || 'Fehler',
+      transcript: transcriptText, // This is the RAW AAI Transcript
+      short_summary: summaryData.short_summary || 'Error',
+      normal_summary: summaryData.normal_summary || 'Error',
+      detailed_summary: summaryData.detailed_summary || 'Error',
       audioUrl: `http://localhost:5000/audio/${audioFilename}`,
       wordCount: transcriptText.split(/\s+/).length,
     };
@@ -122,4 +173,4 @@ app.get('/process-video', async (req, res) => {
 });
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Smart-Backend (v1.0.0) Transkript-Sicherheit aktiv.`));
+app.listen(PORT, () => console.log(`Smart Backend (v1.0.0) Transcript security active.`));
