@@ -142,14 +142,10 @@ async function saveToArchiveWithHistory(msg, resultData) {
 
     if (entry.history.length > 5) entry.history.pop();
 
-    if (msg.summaryType === 'short') entry.short_summary = resultData.short_summary;
-    if (msg.summaryType === 'normal') entry.normal_summary = resultData.normal_summary;
-    if (msg.summaryType === 'detailed') entry.detailed_summary = resultData.detailed_summary;
-    if (msg.summaryType === 'both') {
-      entry.short_summary = resultData.short_summary;
-      entry.normal_summary = resultData.normal_summary;
-      entry.detailed_summary = resultData.detailed_summary;
-    }
+    // Always update all summaries if present in the backend response
+    if (resultData.short_summary) entry.short_summary = resultData.short_summary;
+    if (resultData.normal_summary) entry.normal_summary = resultData.normal_summary;
+    if (resultData.detailed_summary) entry.detailed_summary = resultData.detailed_summary;
 
     entry.transcript = resultData.transcript;
     entry.timestamp = new Date().toISOString();
