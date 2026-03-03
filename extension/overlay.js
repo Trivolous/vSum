@@ -73,7 +73,6 @@ function renderOverlay() {
   }
   panel.style.display = 'flex';
 
-  const state = window.currentVideoState;
   const active = state.activeTab;
   let currentTask =
     active === 'short'
@@ -111,7 +110,7 @@ function renderOverlay() {
                 </button>
             </div>
 
-            <div id="tab-content" class="task-section ${currentTask.stage}">
+            <div id="tab-content" class="task-section ${currentTask ? currentTask.stage : 'idle'}">
                 ${
                   active === 'transcript' && state.audioUrl
                     ? `
@@ -129,6 +128,7 @@ function renderOverlay() {
 
             <div class="sum-footer">
                 ${
+                  currentTask &&
                   (currentTask.stage === 'done' || currentTask.stage === 'cached') &&
                   active !== 'transcript'
                     ? `<button class="action-btn" id="regen-active-btn">
